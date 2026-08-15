@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   InsightFlow — tema
+   Nenhum CSS escrito à mão: apenas tokens do Tailwind 4 (@theme).
+   Cada token abaixo vira utilitário (bg-ink-950, text-flow-300,
+   animate-rise, ...) usado diretamente nos templates.
+------------------------------------------------------------------- */
+@theme {
+  /* superfícies */
+  --color-ink-950: #05080f;
+  --color-ink-900: #080d19;
+  --color-ink-800: #0d1526;
+  --color-ink-700: #141f36;
+  --color-ink-600: #1d2b47;
+  --color-ink-500: #2c3d5e;
+
+  /* textos */
+  --color-mist-100: #f4f7fb;
+  --color-mist-200: #dde5f0;
+  --color-mist-300: #b3c1d6;
+  --color-mist-400: #8496b3;
+  --color-mist-500: #5c6f8c;
+
+  /* acento primário — dados */
+  --color-flow-200: #b6e8f7;
+  --color-flow-300: #7dd8f0;
+  --color-flow-400: #38c5e8;
+  --color-flow-500: #12a8d4;
+  --color-flow-600: #0b86ae;
+
+  /* acento secundário — gradientes */
+  --color-signal-400: #4f8cff;
+  --color-signal-500: #2f6bf0;
+
+  /* confiança — segurança e validação */
+  --color-trust-400: #34d399;
+  --color-trust-500: #10b981;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
