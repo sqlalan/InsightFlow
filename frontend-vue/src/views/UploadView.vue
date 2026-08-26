@@ -1,0 +1,109 @@
+<script setup>
+import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import PainelNav from '../components/layout/PainelNav.vue'
+import UploadPlanilha from '../components/upload/UploadPlanilha.vue'
+
+const resultado = ref(null)
+
+const COLUNAS_ESPERADAS = [
+  'Consultor responsável',
+  'Cliente CTI (código interno)',
+  'Segmento de atuação',
+  'Nível do cliente (A, B ou C)',
+  'Faixa de faturamento anual',
+  'Serviços contratados',
+]
+
+function aoProcessar(resposta) {
+  resultado.value = resposta
+}
+</script>
+
+<template>
+  <div class="min-h-dvh bg-ink-950">
+    <PainelNav />
+
+    <main class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
+      <h1 class="text-2xl font-semibold text-white sm:text-3xl">Enviar planilha</h1>
+      <p class="mt-2 max-w-2xl text-sm text-mist-400">
+        A planilha é validada aqui, tratada por rotinas em Python no servidor e gravada no banco.
+        Variações de escrita, espaços sobrando e células em branco são resolvidos automaticamente.
+      </p>
+
+      <div class="mt-8 grid gap-6 lg:grid-cols-5">
+        <div class="lg:col-span-3">
+          <UploadPlanilha @processada="aoProcessar" />
+        </div>
+
+        <aside class="rounded-2xl border border-white/10 bg-ink-900/40 p-6 lg:col-span-2">
+          <h2 class="text-sm font-semibold text-white">Colunas esperadas</h2>
+          <ul class="mt-3 space-y-2 text-sm text-mist-300">
+            <li v-for="coluna in COLUNAS_ESPERADAS" :key="coluna" class="flex gap-2">
+              <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-flow-400" aria-hidden="true" />
+              {{ coluna }}
+            </li>
+          </ul>
+          <p class="mt-4 text-xs leading-relaxed text-mist-500">
+            O nome da coluna não precisa estar exato: maiúsculas, acentos e espaços são
+            normalizados antes da validação.
+          </p>
+        </aside>
+      </div>
+
+      <section
+        v-if="resultado"
+        class="mt-8 rounded-2xl border border-trust-400/25 bg-trust-500/[0.07] p-6"
+        aria-live="polite"
+      >
+        <h2 class="text-sm font-semibold text-trust-400">Planilha processada</h2>
+
+        <dl class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div>
+            <dt class="text-xs text-mist-500">Linhas lidas</dt>
+            <dd class="text-lg font-semibold tabular-nums text-white">{{ resultado.linhasLidas }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-mist-500">Clientes novos</dt>
+            <dd class="text-lg font-semibold tabular-nums text-white">{{ resultado.clientesImportados }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-mist-500">Atualizados</dt>
+            <dd class="text-lg font-semibold tabular-nums text-white">{{ resultado.clientesAtualizados }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs text-mist-500">Contratos</dt>
+            <dd class="text-lg font-semibold tabular-nums text-white">{{ resultado.contratosImportados }}</dd>
+          </div>
+        </dl>
+
+        <div v-if="resultado.avisos?.length" class="mt-5">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-mist-400">
+            Avisos do tratamento
+          </h3>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-mist-300">
+            <li v-for="(aviso, indice) in resultado.avisos.slice(0, 8)" :key="indice">{{ aviso }}</li>
+          </ul>
+        </div>
+
+        <div v-if="resultado.insights?.length" class="mt-5">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-mist-400">
+            Primeiros insights
+          </h3>
+          <ul class="mt-2 space-y-2 text-sm text-mist-200">
+            <li v-for="insight in resultado.insights.slice(0, 3)" :key="insight.id">
+              {{ insight.resumo }}
+            </li>
+          </ul>
+        </div>
+
+        <RouterLink
+          to="/dashboard"
+          class="mt-6 inline-flex rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 transition hover:bg-mist-100"
+        >
+          Ver dashboard completo
+        </RouterLink>
+      </section>
+    </main>
+  </div>
+</template>
