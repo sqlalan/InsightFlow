@@ -1,4 +1,30 @@
-# Logs
+# ---------------------------------------------------------------------------
+# Dados da CTI - NUNCA versionar
+# A planilha real da empresa e confidencial (ver docs/relacoes-humanas.md).
+# ---------------------------------------------------------------------------
+*.xlsx
+*.xls
+*.csv
+!analytics-python/output/.gitkeep
+backend-java/uploads/
+
+# ---------------------------------------------------------------------------
+# Segredos
+# ---------------------------------------------------------------------------
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Front-end (Node / Vite)
+# ---------------------------------------------------------------------------
+node_modules
+dist
+dist-ssr
+*.local
 logs
 *.log
 npm-debug.log*
@@ -7,12 +33,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ---------------------------------------------------------------------------
+# Back-end (Java / Maven)
+# ---------------------------------------------------------------------------
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
 
-# Editor directories and files
+# ---------------------------------------------------------------------------
+# Ciencia de Dados (Python)
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+analytics-python/output/*.json
+analytics-python/output/graficos/*.png
+
+# ---------------------------------------------------------------------------
+# Editores e sistema
+# ---------------------------------------------------------------------------
 .vscode/*
 !.vscode/extensions.json
 .idea
