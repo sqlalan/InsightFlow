@@ -46,7 +46,7 @@ onMounted(carregar)
 </script>
 
 <template>
-  <div class="min-h-dvh bg-ink-950">
+  <div class="min-h-dvh bg-ink-950 lg:pl-64">
     <PainelNav />
 
     <main class="mx-auto max-w-7xl px-5 py-10 lg:px-8">

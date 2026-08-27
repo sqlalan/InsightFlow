@@ -21,7 +21,7 @@ function aoProcessar(resposta) {
 </script>
 
 <template>
-  <div class="min-h-dvh bg-ink-950">
+  <div class="min-h-dvh bg-ink-950 lg:pl-64">
     <PainelNav />
 
     <main class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
