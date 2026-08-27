@@ -79,7 +79,9 @@ onMounted(carregar)
         </p>
       </div>
 
-      <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Quatro colunas so a partir de xl: com a lateral de 256px ocupando a
+           esquerda, abaixo disso o cartao fica estreito demais. -->
+      <section class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <CardIndicador
           rotulo="Clientes na carteira"
           :valor="indicadores?.totalClientes ?? 0"

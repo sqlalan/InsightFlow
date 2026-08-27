@@ -23,28 +23,53 @@ const formatadores = {
   }),
 }
 
+// O faturamento da carteira chega na casa dos bilhoes e nao cabe por extenso
+// num cartao que ocupa 1/4 da linha. Acima de um milhao o cartao mostra a forma
+// curta e guarda o valor exato no title, que aparece ao passar o mouse.
+const UNIDADES = [
+  { limite: 1_000_000_000, sufixo: 'bi' },
+  { limite: 1_000_000, sufixo: 'mi' },
+]
+
+function abreviarMoeda(numero) {
+  const unidade = UNIDADES.find((u) => Math.abs(numero) >= u.limite)
+  if (!unidade) return formatadores.moeda.format(numero)
+
+  const reduzido = (numero / unidade.limite).toLocaleString('pt-BR', {
+    maximumFractionDigits: 2,
+  })
+  return `R$ ${reduzido} ${unidade.sufixo}`
+}
+
+/** Numero saneado: props podem chegar como string ou nulas vindas da API. */
+const numero = computed(() => {
+  const bruto = Number(props.valor ?? 0)
+  return Number.isFinite(bruto) ? bruto : 0
+})
+
 const valorFormatado = computed(() => {
   if (props.formato === 'texto') return props.valor
-  const numero = Number(props.valor ?? 0)
-  return formatadores[props.formato].format(Number.isFinite(numero) ? numero : 0)
+  if (props.formato === 'moeda') return abreviarMoeda(numero.value)
+  return formatadores.numero.format(numero.value)
+})
+
+/** Só existe quando o valor foi abreviado — vira o tooltip do cartao. */
+const valorExato = computed(() => {
+  if (props.formato !== 'moeda') return null
+  const exato = formatadores.moeda.format(numero.value)
+  return exato === valorFormatado.value ? null : exato
 })
 </script>
 
 <template>
-  <div class="@container rounded-2xl border border-white/10 bg-ink-900/60 p-5">
+  <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-5">
     <p class="text-xs font-medium uppercase tracking-wide text-mist-500">{{ rotulo }}</p>
 
     <div v-if="carregando" class="mt-3 h-8 w-24 animate-pulse rounded bg-white/10" />
-    <!--
-      O corpo do valor acompanha a largura do proprio cartao, nao a da tela:
-      "R$ 1.735.180.000" a 30px estoura um cartao de 1/4 de linha, e encolher
-      pela viewport erraria de novo assim que a lateral do painel muda o espaco
-      disponivel. Com cqi os quatro cartoes tem a mesma largura, entao continuam
-      com o mesmo corpo entre si.
-    -->
     <p
       v-else
-      class="mt-2 font-semibold tabular-nums text-white text-[clamp(1.375rem,11cqi,1.875rem)]"
+      class="mt-2 text-2xl font-semibold tabular-nums text-white sm:text-3xl"
+      :title="valorExato"
     >
       {{ valorFormatado }}
     </p>
