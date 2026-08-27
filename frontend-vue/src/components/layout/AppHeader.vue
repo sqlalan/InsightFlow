@@ -44,18 +44,25 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
         </a>
       </nav>
 
-      <div class="hidden items-center gap-3 lg:flex">
+      <!-- Uma unica acao no cabecalho: antes havia "Entrar" e "Solicitar
+           demonstracao" apontando os dois para /login, com promessas
+           diferentes para o mesmo destino. -->
+      <div class="hidden items-center lg:flex">
         <RouterLink
           to="/login"
-          class="rounded-lg px-4 py-2 text-sm font-medium text-mist-200 transition hover:text-white"
+          class="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-ink-900 shadow-lg shadow-black/20 transition hover:bg-mist-100 hover:shadow-flow-500/10"
         >
           Entrar
-        </RouterLink>
-        <RouterLink
-          to="/login"
-          class="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-ink-900 shadow-lg shadow-black/20 transition hover:bg-mist-100 hover:shadow-flow-500/10"
-        >
-          Solicitar demonstração
+          <svg
+            viewBox="0 0 20 20"
+            class="h-4 w-4 transition group-hover:translate-x-0.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="M4 10h11m0 0-4.5-4.5M15 10l-4.5 4.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </RouterLink>
       </div>
 
@@ -94,18 +101,12 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
         >
           {{ link.label }}
         </a>
-        <div class="mt-3 grid gap-2 border-t border-white/10 pt-4">
+        <div class="mt-3 border-t border-white/10 pt-4">
           <RouterLink
             to="/login"
-            class="rounded-lg border border-white/12 px-4 py-2.5 text-center text-sm font-medium text-mist-200"
+            class="block rounded-lg bg-white px-4 py-3 text-center text-sm font-semibold text-ink-900"
           >
             Entrar
-          </RouterLink>
-          <RouterLink
-            to="/login"
-            class="rounded-lg bg-white px-4 py-2.5 text-center text-sm font-semibold text-ink-900"
-          >
-            Solicitar demonstração
           </RouterLink>
         </div>
       </div>
