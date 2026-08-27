@@ -96,10 +96,16 @@ python analise.py --entrada planilha_exemplo.xlsx --saida output
 
 ```bash
 cd backend-java
-mvn spring-boot:run -Dspring-boot.run.profiles=local   # H2 em memória, sem precisar do Neon
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local   # H2 em memória, sem precisar do Neon
 ```
 
-No Windows, se `python` não estiver no PATH: `PYTHON_BIN=py mvn spring-boot:run …`
+No Windows (PowerShell/cmd), use `mvnw.cmd` no lugar de `./mvnw`. Não é preciso
+instalar Maven: o wrapper baixa a versão certa na primeira execução — só o
+**JDK 21+** precisa estar instalado.
+
+A API descobre sozinha o interpretador Python, testando `python3`, `python` e
+`py` nessa ordem. Se o seu estiver em outro lugar, defina `PYTHON_BIN` com o
+caminho.
 
 ### 3. Front-end
 

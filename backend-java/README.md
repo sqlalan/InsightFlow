@@ -5,23 +5,25 @@ Python de tratamento, grava no PostgreSQL e serve os dados do dashboard.
 
 ## Rodando local
 
+Requisito único: **JDK 21 ou superior**. O Maven não precisa estar instalado —
+o wrapper (`mvnw`) baixa a versão correta na primeira execução.
+
 ```bash
 # banco em memória (não precisa do Neon)
-mvn spring-boot:run -Dspring-boot.run.profiles=local
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # apontando para o Neon
 export DB_URL="jdbc:postgresql://<host>.neon.tech/<base>?sslmode=require"
 export DB_USERNAME="..."
 export DB_PASSWORD="..."
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
-Se o Python não estiver no PATH como `python` (comum no Windows, onde o
-lançador é `py`), defina `PYTHON_BIN` antes de subir:
+No Windows (PowerShell/cmd), troque `./mvnw` por `mvnw.cmd`.
 
-```bash
-PYTHON_BIN=py mvn spring-boot:run -Dspring-boot.run.profiles=local
-```
+O `AnaliseService` procura o interpretador Python testando `python3`, `python` e
+`py` nessa ordem — não é preciso configurar nada no caso comum. Para apontar um
+interpretador específico (um virtualenv, por exemplo), use `PYTHON_BIN`.
 
 ## Variáveis de ambiente
 
@@ -29,7 +31,7 @@ PYTHON_BIN=py mvn spring-boot:run -Dspring-boot.run.profiles=local
 | -------- | ------ | -------------- |
 | `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | PostgreSQL local | conexão com o Neon |
 | `CORS_ORIGINS` | `http://localhost:5173,http://localhost:4173` | domínios liberados (Vercel em produção) |
-| `PYTHON_BIN` | `python` | interpretador usado pelo `ProcessBuilder` |
+| `PYTHON_BIN` | detectado | forca um interpretador Python especifico |
 | `ANALYTICS_DIR` | `../analytics-python` | pasta do módulo de Ciência de Dados |
 | `UPLOAD_DIR` | `uploads` | onde as planilhas recebidas são gravadas |
 | `PORT` | `8080` | porta HTTP (o Render define automaticamente) |
