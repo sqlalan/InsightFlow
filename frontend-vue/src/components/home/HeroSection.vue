@@ -12,7 +12,7 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
 </script>
 
 <template>
-  <section class="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28">
+  <section class="relative overflow-hidden pt-28 pb-14 lg:pt-32 lg:pb-20">
     <!-- fundo -->
     <div
       class="pointer-events-none absolute inset-0 opacity-60 bg-[linear-gradient(to_right,rgba(148,176,214,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,176,214,0.07)_1px,transparent_1px)] bg-size-[56px_56px]"
@@ -31,7 +31,7 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
       aria-hidden="true"
     />
 
-    <div class="relative mx-auto grid max-w-7xl items-center gap-16 px-5 lg:grid-cols-2 lg:px-8">
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-2 lg:px-8">
       <!-- coluna de texto -->
       <div class="animate-rise">
         <span
@@ -50,14 +50,13 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
           em minutos.
         </h1>
 
-        <p class="mt-6 max-w-xl text-lg leading-relaxed text-mist-300">
+        <p class="mt-5 max-w-xl text-lg leading-relaxed text-mist-300">
           O InsightFlow lê seus arquivos <span class="font-medium text-mist-100">.xlsx</span> e
           <span class="font-medium text-mist-100">.xls</span>, valida a consistência dos dados e
-          entrega indicadores, tendências e alertas prontos — sem macro, sem retrabalho e sem
-          expor informação sensível.
+          entrega indicadores, tendências e alertas prontos — sem macro e sem retrabalho.
         </p>
 
-        <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
           <RouterLink
             to="/login"
             class="group inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-flow-400 to-signal-500 px-6 py-3.5 text-sm font-semibold text-white shadow-xl shadow-flow-500/25 transition hover:shadow-flow-500/40"
@@ -75,7 +74,7 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
           </a>
         </div>
 
-        <dl class="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-8">
+        <dl class="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-6">
           <div v-for="stat in [
             { k: '< 60s', v: 'para o primeiro relatório' },
             { k: '500 mil', v: 'linhas por arquivo' },

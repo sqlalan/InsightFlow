@@ -8,19 +8,9 @@ const columns = [
   {
     title: 'Produto',
     items: [
-      { label: 'Recursos', href: '#recursos' },
       { label: 'Como funciona', href: '#como-funciona' },
-      { label: 'Planos', href: '#planos' },
-      { label: 'Integrações', href: '#recursos' },
-    ],
-  },
-  {
-    title: 'Confiança',
-    items: [
+      { label: 'Recursos', href: '#recursos' },
       { label: 'Segurança', href: '#seguranca' },
-      { label: 'Privacidade e LGPD', href: '#seguranca' },
-      { label: 'Status da plataforma', href: '#seguranca' },
-      { label: 'Central de ajuda', href: '#seguranca' },
     ],
   },
   {
@@ -29,7 +19,6 @@ const columns = [
       { label: 'Sobre', href: '#' },
       { label: 'Contato', href: '#' },
       { label: 'Termos de uso', href: '#' },
-      { label: 'Política de privacidade', href: '#' },
     ],
   },
 ]
@@ -37,15 +26,15 @@ const columns = [
 
 <template>
   <footer class="border-t border-white/10 bg-ink-950">
-    <div class="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-      <div class="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+    <div class="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+      <div class="grid gap-10 lg:grid-cols-[1.6fr_repeat(2,1fr)]">
         <div class="max-w-sm">
           <BrandLogo />
-          <p class="mt-5 text-sm leading-relaxed text-mist-400">
-            Plataforma de análise de planilhas Excel para times de operações que precisam
-            de resposta rápida, rastreável e segura.
+          <p class="mt-4 text-sm leading-relaxed text-mist-400">
+            Análise de planilhas Excel para times de operações que precisam de resposta
+            rápida, rastreável e segura.
           </p>
-          <div class="mt-6 flex flex-wrap gap-2">
+          <div class="mt-5 flex flex-wrap gap-2">
             <span
               v-for="badge in ['LGPD', 'Criptografia AES-256', 'Dados no Brasil']"
               :key="badge"
@@ -69,7 +58,7 @@ const columns = [
       </div>
 
       <div
-        class="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between"
+        class="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between"
       >
         <p class="text-xs text-mist-500">
           © {{ year }} InsightFlow. Todos os direitos reservados.

@@ -7,10 +7,9 @@ const scrolled = ref(false)
 const open = ref(false)
 
 const links = [
-  { label: 'Recursos', href: '#recursos' },
   { label: 'Como funciona', href: '#como-funciona' },
+  { label: 'Recursos', href: '#recursos' },
   { label: 'Segurança', href: '#seguranca' },
-  { label: 'Planos', href: '#planos' },
 ]
 
 function onScroll() {

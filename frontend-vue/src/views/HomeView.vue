@@ -5,7 +5,6 @@ import HeroSection from '../components/home/HeroSection.vue'
 import HowItWorks from '../components/home/HowItWorks.vue'
 import FeaturesSection from '../components/home/FeaturesSection.vue'
 import SecuritySection from '../components/home/SecuritySection.vue'
-import PricingSection from '../components/home/PricingSection.vue'
 import CtaSection from '../components/home/CtaSection.vue'
 </script>
 
@@ -17,7 +16,6 @@ import CtaSection from '../components/home/CtaSection.vue'
       <HowItWorks />
       <FeaturesSection />
       <SecuritySection />
-      <PricingSection />
       <CtaSection />
     </main>
     <AppFooter />
