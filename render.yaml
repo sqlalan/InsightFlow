@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# Blueprint do Render - Back-end do Sistema CTI Insights.
+#
+# A imagem e construida pelo backend-java/Dockerfile, que instala JRE e Python
+# no mesmo container (o AnaliseService chama o script Python por ProcessBuilder).
+#
+# As variaveis marcadas com sync:false sao preenchidas no painel do Render:
+# nao existe credencial neste arquivo.
+# ---------------------------------------------------------------------------
+services:
+  - type: web
+    name: cti-insights-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend-java/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/indicadores
+    envVars:
+      - key: DB_URL
+        sync: false        # jdbc:postgresql://<host>.neon.tech/<base>?sslmode=require
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false        # https://<projeto>.vercel.app
+      - key: PYTHON_BIN
+        value: python3
+      - key: ANALYTICS_DIR
+        value: /app/analytics-python
+      - key: UPLOAD_DIR
+        value: /app/uploads
