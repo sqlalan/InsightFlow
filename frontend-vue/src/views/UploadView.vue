@@ -3,7 +3,9 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import PainelNav from '../components/layout/PainelNav.vue'
 import UploadPlanilha from '../components/upload/UploadPlanilha.vue'
+import { useUploadStore } from '../stores/uploadStore'
 
+const upload = useUploadStore()
 const resultado = ref(null)
 
 const COLUNAS_ESPERADAS = [
@@ -50,6 +52,65 @@ function aoProcessar(resposta) {
           </p>
         </aside>
       </div>
+
+      <!-- Prévia lida no navegador: confere o arquivo antes de mandar ao servidor. -->
+      <section
+        v-if="upload.temDados"
+        class="mt-8 rounded-2xl border border-white/10 bg-ink-900/40 p-6"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-white">Prévia dos dados tratados</h2>
+            <p class="mt-1 text-xs text-mist-500">
+              Lida no navegador, antes do envio. O tratamento definitivo é feito no servidor.
+            </p>
+          </div>
+          <dl class="flex gap-6">
+            <div>
+              <dt class="text-xs text-mist-500">Linhas</dt>
+              <dd class="text-lg font-semibold tabular-nums text-white">
+                {{ upload.totalClientes }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-mist-500">Nível A</dt>
+              <dd class="text-lg font-semibold tabular-nums text-white">
+                {{ upload.clientesNivelA }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full min-w-xl text-left text-sm">
+            <thead>
+              <tr class="border-b border-white/10 text-xs uppercase tracking-wide text-mist-500">
+                <th class="py-2 pr-4 font-medium">Código</th>
+                <th class="py-2 pr-4 font-medium">Consultor</th>
+                <th class="py-2 pr-4 font-medium">Segmento</th>
+                <th class="py-2 font-medium">Nível</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(cliente, indice) in upload.previa"
+                :key="cliente.codigo || indice"
+                class="border-b border-white/5 text-mist-300"
+              >
+                <td class="py-2 pr-4 font-medium text-mist-100">{{ cliente.codigo || '—' }}</td>
+                <td class="py-2 pr-4">{{ cliente.consultor || '—' }}</td>
+                <td class="py-2 pr-4">{{ cliente.segmento || '—' }}</td>
+                <td class="py-2">{{ cliente.nivel || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p v-if="upload.totalClientes > upload.previa.length" class="mt-3 text-xs text-mist-500">
+          Mostrando as {{ upload.previa.length }} primeiras de
+          {{ upload.totalClientes }} linhas.
+        </p>
+      </section>
 
       <section
         v-if="resultado"
