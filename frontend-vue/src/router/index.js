@@ -29,6 +29,12 @@ const routes = [
     meta: { title: 'Dashboard — InsightFlow' },
   },
   {
+    path: '/relatorios',
+    name: 'relatorios',
+    component: () => import('../views/RelatoriosView.vue'),
+    meta: { title: 'Relatórios — InsightFlow' },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },

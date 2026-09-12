@@ -82,6 +82,11 @@ export function buscarInsights() {
   return api.get('/api/insights').then((resposta) => resposta.data)
 }
 
+/** Histórico de uploads e execuções do módulo de análise. */
+export function buscarTelemetria() {
+  return api.get('/api/telemetria').then((resposta) => resposta.data)
+}
+
 export function listarClientes(segmento) {
   return api
     .get('/api/clientes', { params: segmento ? { segmento } : {} })
