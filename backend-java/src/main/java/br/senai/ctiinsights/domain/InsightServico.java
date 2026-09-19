@@ -27,7 +27,7 @@ public class InsightServico extends Insight {
 
     @Override
     public String getTipo() {
-        return "Servico";
+        return "Serviço";
     }
 
     @Override

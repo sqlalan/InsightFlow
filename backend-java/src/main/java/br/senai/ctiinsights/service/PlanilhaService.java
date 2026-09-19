@@ -35,6 +35,15 @@ public class PlanilhaService {
     private static final List<String> COLUNAS_OBRIGATORIAS = List.of(
             "consultor", "cliente_cti", "segmento", "nivel", "faturamento_anual", "servicos_contratados");
 
+    /** Nome de cada coluna obrigatoria como aparece para o usuario na mensagem de erro. */
+    private static final Map<String, String> ROTULOS = Map.of(
+            "consultor", "Consultor",
+            "cliente_cti", "Código do cliente",
+            "segmento", "Segmento",
+            "nivel", "Nível do cliente",
+            "faturamento_anual", "Faturamento anual",
+            "servicos_contratados", "Serviços contratados");
+
     /**
      * Sinonimos de cabecalho aceitos. Espelha o dicionario `equivalentes` de
      * limpeza.py: se uma variacao for aceita la e recusada aqui, a planilha
@@ -90,7 +99,7 @@ public class PlanilhaService {
             Files.copy(origem, destino, StandardCopyOption.REPLACE_EXISTING);
             return destino;
         } catch (IOException e) {
-            throw new ExcelInvalidoException("Falha ao gravar o arquivo no servidor.", e);
+            throw new ExcelInvalidoException("Não foi possível salvar o arquivo. Tente novamente.", e);
         }
     }
 
@@ -99,20 +108,20 @@ public class PlanilhaService {
         try (InputStream in = Files.newInputStream(arquivo); Workbook workbook = WorkbookFactory.create(in)) {
             Sheet aba = workbook.getSheetAt(0);
             if (aba == null || aba.getPhysicalNumberOfRows() < 2) {
-                throw new ExcelInvalidoException("A planilha esta vazia ou so tem cabecalho.");
+                throw new ExcelInvalidoException("A planilha está vazia ou só tem o cabeçalho.");
             }
             conferirCabecalho(aba.getRow(aba.getFirstRowNum()));
             return aba.getLastRowNum() - aba.getFirstRowNum();
         } catch (ColunaObrigatoriaException | ExcelInvalidoException e) {
             throw e;
         } catch (IOException | RuntimeException e) {
-            throw new ExcelInvalidoException("O arquivo nao pode ser lido como Excel.", e);
+            throw new ExcelInvalidoException("O arquivo não pôde ser aberto como planilha do Excel.", e);
         }
     }
 
     private void conferirCabecalho(Row cabecalho) {
         if (cabecalho == null) {
-            throw new ExcelInvalidoException("A planilha nao tem linha de cabecalho.");
+            throw new ExcelInvalidoException("A planilha não tem linha de cabeçalho.");
         }
         Set<String> presentes = new HashSet<>();
         for (Cell celula : cabecalho) {
@@ -121,7 +130,7 @@ public class PlanilhaService {
         List<String> faltantes = new ArrayList<>();
         for (String obrigatoria : COLUNAS_OBRIGATORIAS) {
             if (!presentes.contains(obrigatoria)) {
-                faltantes.add(obrigatoria);
+                faltantes.add(ROTULOS.get(obrigatoria));
             }
         }
         if (!faltantes.isEmpty()) {

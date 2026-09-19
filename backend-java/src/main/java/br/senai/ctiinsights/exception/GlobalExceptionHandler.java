@@ -1,6 +1,8 @@
 package br.senai.ctiinsights.exception;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,12 +17,14 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ExcelInvalidoException.class)
     public ResponseEntity<ApiError> excelInvalido(ExcelInvalidoException ex) {
         return ResponseEntity.badRequest().body(ApiError.of(
                 HttpStatus.BAD_REQUEST.value(),
                 "PLANILHA_INVALIDA",
-                "Nao foi possivel ler a planilha enviada. " + ex.getMessage()));
+                "Não foi possível ler a planilha enviada. " + ex.getMessage()));
     }
 
     @ExceptionHandler(ColunaObrigatoriaException.class)
@@ -28,7 +32,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.unprocessableEntity().body(ApiError.of(
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "COLUNA_OBRIGATORIA",
-                "A planilha esta incompleta. Confira o modelo antes de enviar de novo.",
+                "A planilha está incompleta. Confira o modelo antes de enviar de novo.",
                 ex.getColunasFaltantes()));
     }
 
@@ -50,10 +54,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AnaliseException.class)
     public ResponseEntity<ApiError> analise(AnaliseException ex) {
+        // A causa tecnica fica no log do servidor; o usuario recebe so o que pode fazer.
+        log.error("Falha na analise da planilha: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ApiError.of(
                 HttpStatus.SERVICE_UNAVAILABLE.value(),
                 "FALHA_NA_ANALISE",
-                "A planilha foi recebida, mas o tratamento dos dados falhou. " + ex.getMessage()));
+                "A planilha foi recebida, mas a análise dos dados não foi concluída. Tente novamente."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -41,7 +41,7 @@ public class InsightFaturamento extends Insight {
             return getDescricao();
         }
         NumberFormat moeda = NumberFormat.getCurrencyInstance(PT_BR);
-        return String.format("Media de %s contra mediana de %s. %s",
+        return String.format("Faturamento médio de %s e mediano de %s. %s",
                 moeda.format(faturamentoMedio), moeda.format(faturamentoMediano), getDescricao());
     }
 

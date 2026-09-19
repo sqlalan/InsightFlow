@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Orquestra o caminho completo do upload:
- * validar a planilha -> rodar o Python -> gravar no Neon -> devolver os insights.
+ * validar a planilha -> rodar o Python -> gravar no PostgreSQL -> devolver os insights.
  */
 @Service
 public class ImportacaoService {
@@ -68,18 +68,20 @@ public class ImportacaoService {
             telemetria.registrar("UPLOAD", "ERRO", e.getMessage(), System.currentTimeMillis() - inicio);
             throw e;
         }
-        telemetria.registrar("UPLOAD", "OK", destino.getFileName() + " com " + linhas + " linhas",
+        telemetria.registrar("UPLOAD", "OK", linhas + " linhas lidas",
                 System.currentTimeMillis() - inicio);
 
         AnaliseService.ResultadoAnalise resultado;
         try {
             resultado = analises.executar(destino);
         } catch (RuntimeException e) {
-            telemetria.registrar("ANALISE_PYTHON", "ERRO", e.getMessage(), System.currentTimeMillis() - inicio);
+            // O detalhe aparece na tela de Relatorios; a causa tecnica vai para o log.
+            telemetria.registrar("ANALISE_PYTHON", "ERRO", "Análise não concluída",
+                    System.currentTimeMillis() - inicio);
             throw e;
         }
         telemetria.registrar("ANALISE_PYTHON", "OK",
-                "clientes tratados: " + resultado.clientes().size(), resultado.duracaoMs());
+                resultado.clientes().size() + " clientes analisados", resultado.duracaoMs());
 
         Contadores contadores = gravarClientes(resultado.clientes());
         List<Insight> gerados = gravarInsights(resultado.insights());
@@ -100,7 +102,7 @@ public class ImportacaoService {
         for (JsonNode linha : tratados) {
             String codigo = texto(linha, "codigo_cti");
             if (codigo.isBlank()) {
-                contadores.avisos.add("Linha ignorada: cliente sem codigo CTI.");
+                contadores.avisos.add("Linha ignorada: cliente sem código.");
                 continue;
             }
             Cliente cliente = clientes.findByCodigoCti(codigo).orElse(null);
@@ -124,7 +126,7 @@ public class ImportacaoService {
     private int gravarContratos(Cliente cliente, JsonNode linha, Contadores contadores) {
         JsonNode lista = linha.path("servicos_contratados");
         if (!lista.isArray() || lista.isEmpty()) {
-            contadores.avisos.add("Cliente " + cliente.getCodigoCti() + " sem servico informado.");
+            contadores.avisos.add("Cliente " + cliente.getCodigoCti() + " sem serviço informado.");
             return 0;
         }
         LocalDate inicio = data(linha, "data_inicio");
@@ -155,11 +157,11 @@ public class ImportacaoService {
             String descricao = texto(item, "descricao");
             Insight insight = switch (tipo) {
                 case "SEGMENTO" -> new InsightSegmento(descricao, texto(item, "segmento"),
-                        item.path("participacao_percentual").asDouble());
+                        numeroOuNulo(item, "participacao_percentual"));
                 case "FATURAMENTO" -> new InsightFaturamento(descricao,
                         decimal(item, "faturamento_medio"), decimal(item, "faturamento_mediano"));
                 case "SERVICO" -> new InsightServico(descricao, texto(item, "servico"),
-                        item.path("total_contratos").asInt());
+                        inteiroOuNulo(item, "total_contratos"));
                 default -> null;
             };
             if (insight != null) {
@@ -184,6 +186,17 @@ public class ImportacaoService {
     private static BigDecimal decimal(JsonNode no, String campo) {
         JsonNode valor = no.path(campo);
         return valor.isNumber() ? valor.decimalValue() : null;
+    }
+
+    /** null no JSON continua null: asDouble() devolveria 0.0 e o resumo diria "concentra 0,0%". */
+    private static Double numeroOuNulo(JsonNode no, String campo) {
+        JsonNode valor = no.path(campo);
+        return valor.isNumber() ? valor.asDouble() : null;
+    }
+
+    private static Integer inteiroOuNulo(JsonNode no, String campo) {
+        JsonNode valor = no.path(campo);
+        return valor.isNumber() ? valor.asInt() : null;
     }
 
     private static LocalDate data(JsonNode no, String campo) {

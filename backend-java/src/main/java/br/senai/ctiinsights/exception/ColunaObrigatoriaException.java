@@ -8,7 +8,7 @@ public class ColunaObrigatoriaException extends RuntimeException {
     private final List<String> colunasFaltantes;
 
     public ColunaObrigatoriaException(List<String> colunasFaltantes) {
-        super("A planilha nao tem as colunas obrigatorias: " + String.join(", ", colunasFaltantes));
+        super("Faltam colunas obrigatórias: " + String.join(", ", colunasFaltantes));
         this.colunasFaltantes = colunasFaltantes;
     }
 

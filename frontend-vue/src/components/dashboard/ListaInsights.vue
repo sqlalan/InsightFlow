@@ -12,7 +12,7 @@ defineProps({
 const CORES_TIPO = {
   Segmento: 'bg-flow-500/15 text-flow-300',
   Faturamento: 'bg-signal-500/15 text-signal-400',
-  Servico: 'bg-trust-500/15 text-trust-400',
+  Serviço: 'bg-trust-500/15 text-trust-400',
 }
 </script>
 

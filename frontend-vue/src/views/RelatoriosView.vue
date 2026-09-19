@@ -40,6 +40,16 @@ const ultimoProcessamento = computed(() => {
 
 const falhas = computed(() => eventos.value.filter((e) => e.status !== 'OK').length)
 
+// A API grava o evento como código; a tabela mostra o nome para o usuário.
+const NOMES_EVENTO = {
+  UPLOAD: 'Envio da planilha',
+  ANALISE_PYTHON: 'Análise dos dados',
+}
+
+function nomeDoEvento(codigo) {
+  return NOMES_EVENTO[codigo] ?? codigo
+}
+
 function formatarData(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
@@ -58,9 +68,9 @@ function formatarDuracao(ms) {
  */
 function exportarCsv() {
   const cabecalho = [
-    'Codigo CTI',
+    'Código do cliente',
     'Segmento',
-    'Nivel',
+    'Nível',
     'Faturamento anual',
     'Faixa de faturamento',
     'Consultor',
@@ -101,7 +111,7 @@ function exportarCsv() {
         <div>
           <h1 class="text-2xl font-semibold text-white sm:text-3xl">Relatórios</h1>
           <p class="mt-2 text-sm text-mist-400">
-            Insights gerados, histórico de processamento e exportação da carteira tratada.
+            Insights gerados, histórico de processamento e exportação da carteira.
           </p>
         </div>
         <button
@@ -121,8 +131,7 @@ function exportarCsv() {
       >
         <p class="text-sm font-medium text-red-200">{{ erro }}</p>
         <p class="mt-1 text-xs text-red-200/70">
-          Confira se a API está no ar e se
-          <code class="rounded bg-black/30 px-1">VITE_API_URL</code> aponta para o endereço certo.
+          Clique em Atualizar para tentar de novo.
         </p>
       </div>
 
@@ -170,7 +179,7 @@ function exportarCsv() {
             <div>
               <h2 class="text-sm font-semibold text-white">Histórico de processamento</h2>
               <p class="mt-0.5 text-xs text-mist-500">
-                Registro de cada upload e execução da análise
+                Registro de cada envio de planilha e análise dos dados
               </p>
             </div>
             <button
@@ -208,7 +217,7 @@ function exportarCsv() {
                   :key="evento.id"
                   class="border-b border-white/5 text-mist-300"
                 >
-                  <td class="py-2.5 pr-4 font-medium text-mist-100">{{ evento.evento }}</td>
+                  <td class="py-2.5 pr-4 font-medium text-mist-100">{{ nomeDoEvento(evento.evento) }}</td>
                   <td class="py-2.5 pr-4">
                     <span
                       class="rounded-md px-2 py-0.5 text-xs font-semibold"
@@ -218,7 +227,7 @@ function exportarCsv() {
                           : 'bg-red-500/15 text-red-300'
                       "
                     >
-                      {{ evento.status }}
+                      {{ evento.status === 'OK' ? 'Concluído' : 'Falhou' }}
                     </span>
                   </td>
                   <td class="py-2.5 pr-4">{{ evento.detalhe || '—' }}</td>
