@@ -83,6 +83,11 @@ def normalizar_cabecalho(nome: object) -> str:
     base = normalizar_texto(nome)
     base = re.sub(r"[^a-z0-9]+", "_", base).strip("_")
     equivalentes = {
+        # Cabecalhos do modelo oficial da aula (CTI_Insights_modelo_upload_aula).
+        "codigo_cliente": "cliente_cti",
+        "nivel_cliente": "nivel",
+        "data_contratacao": "data_inicio",
+        # Variacoes da planilha original da CTI.
         "cliente": "cliente_cti",
         "codigo_cti": "cliente_cti",
         "cliente_cti_codigo": "cliente_cti",

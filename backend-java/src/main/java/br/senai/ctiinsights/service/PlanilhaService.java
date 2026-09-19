@@ -42,6 +42,11 @@ public class PlanilhaService {
      * Ao mexer em um dos dois, mexer no outro.
      */
     private static final Map<String, String> EQUIVALENTES = Map.ofEntries(
+            // Cabecalhos do modelo oficial da aula (CTI_Insights_modelo_upload_aula).
+            Map.entry("codigo_cliente", "cliente_cti"),
+            Map.entry("nivel_cliente", "nivel"),
+            Map.entry("data_contratacao", "data_inicio"),
+            // Variacoes da planilha original da CTI.
             Map.entry("cliente", "cliente_cti"),
             Map.entry("codigo", "cliente_cti"),
             Map.entry("codigo_cti", "cliente_cti"),

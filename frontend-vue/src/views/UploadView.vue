@@ -5,13 +5,18 @@ import { useUploadStore } from '../stores/uploadStore'
 
 const upload = useUploadStore()
 
+// Cabeçalhos do modelo oficial da aula, na ordem da planilha.
 const COLUNAS_ESPERADAS = [
-  'Consultor responsável',
-  'Cliente CTI (código interno)',
-  'Segmento de atuação',
-  'Nível do cliente (A, B ou C)',
-  'Faixa de faturamento anual',
-  'Serviços contratados',
+  { nome: 'codigo_cliente', obrigatoria: true },
+  { nome: 'nome_cliente', obrigatoria: false },
+  { nome: 'consultor', obrigatoria: true },
+  { nome: 'segmento', obrigatoria: true },
+  { nome: 'nivel_cliente', obrigatoria: true },
+  { nome: 'faturamento_anual', obrigatoria: true },
+  { nome: 'servicos_contratados', obrigatoria: true },
+  { nome: 'data_contratacao', obrigatoria: false },
+  { nome: 'cidade', obrigatoria: false },
+  { nome: 'uf', obrigatoria: false },
 ]
 </script>
 
@@ -33,15 +38,24 @@ const COLUNAS_ESPERADAS = [
 
         <aside class="rounded-2xl border border-white/10 bg-ink-900/40 p-6 lg:col-span-2">
           <h2 class="text-sm font-semibold text-white">Colunas esperadas</h2>
-          <ul class="mt-3 space-y-2 text-sm text-mist-300">
-            <li v-for="coluna in COLUNAS_ESPERADAS" :key="coluna" class="flex gap-2">
-              <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-flow-400" aria-hidden="true" />
-              {{ coluna }}
+          <ul class="mt-3 space-y-2 text-sm">
+            <li
+              v-for="coluna in COLUNAS_ESPERADAS"
+              :key="coluna.nome"
+              class="flex items-center justify-between gap-3"
+            >
+              <code
+                class="font-mono text-[0.8rem]"
+                :class="coluna.obrigatoria ? 'text-mist-200' : 'text-mist-500'"
+              >
+                {{ coluna.nome }}
+              </code>
+              <span v-if="!coluna.obrigatoria" class="text-[0.7rem] text-mist-500">opcional</span>
             </li>
           </ul>
           <p class="mt-4 text-xs leading-relaxed text-mist-500">
-            O nome da coluna não precisa estar exato: maiúsculas, acentos e espaços são
-            normalizados antes da validação.
+            Segue o modelo da aula. Maiúsculas, acentos e espaços no cabeçalho são normalizados
+            antes da validação, e a planilha original da CTI também é aceita.
           </p>
         </aside>
       </div>

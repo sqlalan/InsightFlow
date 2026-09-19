@@ -58,6 +58,8 @@ const SEGMENTOS = {
   SAUDE: 'Saúde',
   AGRO: 'Agronegócio',
   AGRONEGOCIO: 'Agronegócio',
+  TEC: 'Tecnologia',
+  TECNOLOGIA: 'Tecnologia',
 }
 
 /** Tira acento, pontuacao e espaco para comparar textos escritos de formas diferentes. */
@@ -180,7 +182,8 @@ export const useUploadStore = defineStore('upload', {
         codigo: String(tratada.codigo ?? '').trim().toUpperCase(),
         nome: padronizarNome(tratada.nome),
         consultor: padronizarNome(tratada.consultor),
-        segmento: SEGMENTOS[segmento] || String(tratada.segmento ?? '').trim(),
+        // Segmento fora do mapa ainda sai em uma grafia só, como no limpeza.py.
+        segmento: SEGMENTOS[segmento] || padronizarNome(tratada.segmento),
         // "Nivel A", "classe b" e " C " chegam como A, B e C.
         nivel: String(tratada.nivel ?? '')
           .replace(/n[íi]vel|classe/gi, '')
