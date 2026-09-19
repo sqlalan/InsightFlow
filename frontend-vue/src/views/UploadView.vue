@@ -6,17 +6,18 @@ import { useUploadStore } from '../stores/uploadStore'
 const upload = useUploadStore()
 
 // Cabeçalhos do modelo oficial da aula, na ordem da planilha.
+// `rotulo` é o que aparece na tela; `nome` é o cabeçalho real, mostrado ao passar o mouse.
 const COLUNAS_ESPERADAS = [
-  { nome: 'codigo_cliente', obrigatoria: true },
-  { nome: 'nome_cliente', obrigatoria: false },
-  { nome: 'consultor', obrigatoria: true },
-  { nome: 'segmento', obrigatoria: true },
-  { nome: 'nivel_cliente', obrigatoria: true },
-  { nome: 'faturamento_anual', obrigatoria: true },
-  { nome: 'servicos_contratados', obrigatoria: true },
-  { nome: 'data_contratacao', obrigatoria: false },
-  { nome: 'cidade', obrigatoria: false },
-  { nome: 'uf', obrigatoria: false },
+  { nome: 'codigo_cliente', rotulo: 'Código do cliente', obrigatoria: true },
+  { nome: 'nome_cliente', rotulo: 'Nome do cliente', obrigatoria: false },
+  { nome: 'consultor', rotulo: 'Consultor', obrigatoria: true },
+  { nome: 'segmento', rotulo: 'Segmento', obrigatoria: true },
+  { nome: 'nivel_cliente', rotulo: 'Nível do cliente', obrigatoria: true },
+  { nome: 'faturamento_anual', rotulo: 'Faturamento anual', obrigatoria: true },
+  { nome: 'servicos_contratados', rotulo: 'Serviços contratados', obrigatoria: true },
+  { nome: 'data_contratacao', rotulo: 'Data de contratação', obrigatoria: false },
+  { nome: 'cidade', rotulo: 'Cidade', obrigatoria: false },
+  { nome: 'uf', rotulo: 'UF', obrigatoria: false },
 ]
 </script>
 
@@ -44,12 +45,12 @@ const COLUNAS_ESPERADAS = [
               :key="coluna.nome"
               class="flex items-center justify-between gap-3"
             >
-              <code
-                class="font-mono text-[0.8rem]"
+              <span
+                :title="coluna.nome"
                 :class="coluna.obrigatoria ? 'text-mist-200' : 'text-mist-500'"
               >
-                {{ coluna.nome }}
-              </code>
+                {{ coluna.rotulo }}
+              </span>
               <span v-if="!coluna.obrigatoria" class="text-[0.7rem] text-mist-500">opcional</span>
             </li>
           </ul>
