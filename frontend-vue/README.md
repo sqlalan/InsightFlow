@@ -2,7 +2,11 @@
 
 Front-end do Sistema CTI Insights.
 **Vue 3** (`<script setup>`) + **Vite** + **Tailwind CSS 4** + **Vue Router 4** +
-**Chart.js** (via `vue-chartjs`) + **axios**.
+**Pinia** + **Chart.js** (via `vue-chartjs`) + **axios** + **xlsx** (SheetJS).
+
+O `xlsx` é instalado do endereço oficial da SheetJS (`cdn.sheetjs.com`), não do
+registro do npm: lá a última versão é a 0.18.5, com duas falhas de segurança
+conhecidas, e as correções só são publicadas pelo próprio fabricante.
 
 ## Rodando
 
@@ -25,9 +29,10 @@ npm run preview  # serve o build
 | `/login`     | Autenticação                      | UI concluída, API pendente |
 | `/upload`    | Envio da planilha Excel           | concluída |
 | `/dashboard` | Indicadores, gráficos e carteira  | concluída |
+| `/relatorios`| Histórico, insights e exportação CSV | concluída |
 | `*`          | Redireciona para `/`              | — |
 
-`/upload` e `/dashboard` são carregadas sob demanda: a landing não paga o custo
+As telas do painel são carregadas sob demanda: a landing não paga o custo
 do Chart.js no bundle inicial.
 
 ## Componentes
@@ -35,16 +40,20 @@ do Chart.js no bundle inicial.
 ```
 src/
 ├── services/api.js            axios + tradução dos erros da API
+├── stores/uploadStore.js      Pinia: leitura da planilha, prévia e envio
 ├── views/
 │   ├── HomeView.vue           landing
 │   ├── LoginView.vue          login (lazy)
-│   ├── UploadView.vue         envio + resumo do processamento (lazy)
-│   └── DashboardView.vue      cartões, gráficos, tabela e insights (lazy)
+│   ├── UploadView.vue         envio + prévia dos dados (lazy)
+│   ├── DashboardView.vue      cartões, gráficos, tabela e insights (lazy)
+│   └── RelatoriosView.vue     histórico de processamento, insights e CSV (lazy)
 └── components/
     ├── BrandLogo.vue
     ├── layout/                AppHeader, AppFooter, PainelNav
     ├── home/                  seções da landing
-    ├── upload/UploadPlanilha.vue   drag-and-drop, validação, progresso
+    ├── upload/
+    │   ├── UploadPlanilha.vue      drag-and-drop e seleção do arquivo
+    │   └── ModalEnvio.vue          confirmação, progresso e resumo do envio
     └── dashboard/
         ├── grafico.js         registro do Chart.js + paleta e escalas do tema
         ├── PainelGrafico.vue  moldura comum (título, estado vazio, altura)
@@ -59,8 +68,10 @@ src/
 
 ## Estado e props
 
-Os componentes recebem dados por **props** e devolvem eventos por **emit** — quem
-busca da API é sempre a view. `DashboardView` faz as três chamadas em paralelo
+A tela de upload guarda o estado no **Pinia** (`stores/uploadStore.js`): arquivo,
+prévia, avisos e resultado do envio ficam na store e são lidos pela view, pelo
+componente de envio e pelo diálogo. Nas demais telas, os componentes recebem
+dados por **props** e devolvem eventos por **emit** — quem busca da API é a view. `DashboardView` faz as três chamadas em paralelo
 (`Promise.all`) e passa os recortes para cada gráfico; `TabelaClientes` guarda
 apenas o estado da própria tela (busca, filtro, ordenação) com `ref`/`computed`,
 e avisa o pai com `@alterado` depois de alterar um cliente.
@@ -98,7 +109,7 @@ Tailwind 4 para extraí-lo é a diretiva `@utility` — não voltar a escrever C
 ## Responsividade
 
 Testar em pelo menos duas larguras (exigência do plano de ensino). Os
-breakpoints usados são `sm`, `lg`: a linha de indicadores vai de 1 para 2 e
+breakpoints usados são `sm`, `lg` e `xl`: a linha de indicadores vai de 1 para 2 e
 depois 4 colunas, os gráficos de 1 para 2 colunas, e a tabela rola
 horizontalmente dentro do próprio card em telas estreitas.
 
@@ -108,4 +119,3 @@ horizontalmente dentro do próprio card em telas estreitas.
   ponto de integração está marcado com `TODO` (`POST /api/auth/login`).
 - Links de "Esqueci minha senha", "Solicite uma conta", SSO, termos e
   privacidade apontam para `#`.
-- Valores da seção de planos são de referência e precisam ser confirmados.

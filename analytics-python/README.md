@@ -13,8 +13,8 @@ pip install -r requirements.txt
 ## Execucao
 
 ```bash
-python gerar_planilha_exemplo.py            # cria uma planilha despadronizada de teste
-python analise.py --entrada planilha_exemplo.xlsx --saida output
+python analise.py --entrada exemplos/CTI_Insights_modelo_upload_aula.xlsx --saida output
+python -m unittest discover tests           # testes do tratamento
 ```
 
 ## Arquivos
