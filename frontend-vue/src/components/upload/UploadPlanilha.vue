@@ -1,14 +1,23 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useUploadStore } from '../../stores/uploadStore'
-
-const emit = defineEmits(['processada'])
+import ModalEnvio from './ModalEnvio.vue'
 
 const upload = useUploadStore()
 
 // Estado que é só da interface fica no componente; o resto mora no store.
 const arrastando = ref(false)
 const campo = ref(null)
+const confirmando = ref(false)
+
+// Quando o store é limpo (envio concluído, "Remover"), o input também precisa
+// esquecer o arquivo -- senão escolher o mesmo arquivo de novo não dispara @change.
+watch(
+  () => upload.arquivo,
+  (arquivo) => {
+    if (!arquivo && campo.value) campo.value.value = ''
+  },
+)
 
 const tamanhoLegivel = computed(() => {
   if (!upload.arquivo) return ''
@@ -30,14 +39,6 @@ function aoSoltar(evento) {
 
 function remover() {
   upload.limpar()
-  if (campo.value) campo.value.value = ''
-}
-
-async function enviar() {
-  const resultado = await upload.enviarParaBackend()
-  if (!resultado) return
-  emit('processada', resultado)
-  if (campo.value) campo.value.value = ''
 }
 </script>
 
@@ -112,23 +113,15 @@ async function enviar() {
       </ul>
     </div>
 
-    <div v-if="upload.enviando" class="mt-4">
-      <div class="h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div
-          class="h-full rounded-full bg-flow-400 transition-all duration-200"
-          :style="{ width: `${upload.progresso}%` }"
-        />
-      </div>
-      <p class="mt-2 text-xs text-mist-400">{{ upload.rotuloProgresso }}</p>
-    </div>
-
     <button
       type="button"
       class="mt-6 w-full rounded-lg bg-flow-500 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:bg-flow-400 disabled:cursor-not-allowed disabled:opacity-40"
       :disabled="!upload.temDados || upload.enviando"
-      @click="enviar"
+      @click="confirmando = true"
     >
-      {{ upload.enviando ? 'Processando…' : 'Enviar e analisar' }}
+      Enviar e analisar
     </button>
+
+    <ModalEnvio v-model="confirmando" />
   </div>
 </template>

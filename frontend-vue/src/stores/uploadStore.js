@@ -94,6 +94,8 @@ export const useUploadStore = defineStore('upload', {
     enviando: false,
     progresso: 0,
     resultado: null,
+    // Separado de `erros`: aquilo são avisos da prévia; isto é a API recusando o envio.
+    erroEnvio: null,
   }),
 
   getters: {
@@ -103,8 +105,6 @@ export const useUploadStore = defineStore('upload', {
     temDados: (state) => state.dadosTratados.length > 0,
     /** A tabela mostra só o começo: 500 linhas na tela não ajudam a conferir nada. */
     previa: (state) => state.dadosTratados.slice(0, LINHAS_NA_PREVIA),
-    rotuloProgresso: (state) =>
-      state.progresso >= 100 ? 'Tratando os dados no servidor…' : `Enviando… ${state.progresso}%`,
   },
 
   actions: {
@@ -229,14 +229,14 @@ export const useUploadStore = defineStore('upload', {
 
       this.enviando = true
       this.progresso = 0
+      this.erroEnvio = null
       try {
         this.resultado = await enviarPlanilha(this.arquivo, (valor) => {
           this.progresso = valor
         })
         return this.resultado
       } catch (falha) {
-        this.erros.push(falha.message)
-        if (falha.detalhes?.length) this.erros.push(...falha.detalhes)
+        this.erroEnvio = { mensagem: falha.message, detalhes: falha.detalhes ?? [] }
         return null
       } finally {
         this.enviando = false
@@ -250,6 +250,7 @@ export const useUploadStore = defineStore('upload', {
       this.erros = []
       this.progresso = 0
       this.resultado = null
+      this.erroEnvio = null
     },
   },
 })
