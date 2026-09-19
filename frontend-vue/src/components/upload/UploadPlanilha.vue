@@ -46,8 +46,7 @@ function remover() {
   <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6 sm:p-8">
     <h2 class="text-lg font-semibold text-white">Envio da planilha</h2>
     <p class="mt-1 text-sm text-mist-400">
-      A planilha é lida aqui no navegador para conferência. O tratamento que vale é feito no
-      servidor, depois que você confirmar o envio.
+      Selecione o arquivo, confira a prévia e confirme o envio.
     </p>
 
     <label
@@ -100,17 +99,32 @@ function remover() {
 
     <p v-if="upload.carregando" class="mt-4 text-sm text-mist-400">Lendo a planilha…</p>
 
+    <!-- Vermelho: o arquivo não pode ser enviado. -->
     <div
       v-if="upload.totalErros > 0"
       role="alert"
       class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3"
     >
-      <p class="text-sm font-medium text-red-200">
-        {{ upload.totalErros }} aviso(s) na planilha
-      </p>
-      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-red-200/80">
-        <li v-for="(aviso, indice) in upload.erros" :key="indice">{{ aviso }}</li>
+      <ul class="space-y-1 text-sm text-red-200">
+        <li v-for="(erro, indice) in upload.erros" :key="indice">{{ erro }}</li>
       </ul>
+    </div>
+
+    <!-- Amarelo: dá para enviar; o tratamento corrige o que está listado. -->
+    <div
+      v-if="upload.totalAvisos > 0"
+      role="status"
+      class="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
+    >
+      <p class="text-sm font-medium text-amber-200">
+        {{ upload.totalAvisos }} aviso(s) na planilha
+      </p>
+      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-100/80">
+        <li v-for="(aviso, indice) in upload.avisos" :key="indice">{{ aviso }}</li>
+      </ul>
+      <p class="mt-2 text-xs text-amber-100/60">
+        Os avisos não impedem o envio. Para corrigir, ajuste essas linhas na planilha e envie de novo.
+      </p>
     </div>
 
     <button

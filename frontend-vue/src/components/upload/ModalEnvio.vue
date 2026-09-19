@@ -118,16 +118,15 @@ function formatarDuracao(ms) {
           <dt class="text-xs text-mist-500">Avisos</dt>
           <dd
             class="mt-1 text-xl font-semibold tabular-nums"
-            :class="upload.totalErros ? 'text-amber-300' : 'text-white'"
+            :class="upload.totalAvisos ? 'text-amber-300' : 'text-white'"
           >
-            {{ upload.totalErros }}
+            {{ upload.totalAvisos }}
           </dd>
         </div>
       </dl>
 
-      <p v-if="upload.totalErros" class="mt-4 text-xs leading-relaxed text-mist-400">
-        Os avisos não impedem o envio. O servidor trata essas linhas e informa no resumo o que
-        ficou de fora.
+      <p v-if="upload.totalAvisos" class="mt-4 text-xs leading-relaxed text-mist-400">
+        Os avisos não impedem o envio. Ao final, o resumo mostra o que ficou de fora.
       </p>
 
       <div class="mt-6 flex justify-end gap-3">
@@ -156,7 +155,7 @@ function formatarDuracao(ms) {
           aria-hidden="true"
         />
         <h2 id="titulo-envio" class="text-lg font-semibold text-white">
-          {{ upload.progresso < 100 ? 'Enviando a planilha' : 'Tratando os dados' }}
+          {{ upload.progresso < 100 ? 'Enviando a planilha' : 'Analisando os dados' }}
         </h2>
       </div>
 
@@ -173,8 +172,7 @@ function formatarDuracao(ms) {
           Enviando o arquivo… {{ upload.progresso }}%
         </template>
         <template v-else>
-          O módulo Python está padronizando a planilha e calculando as estatísticas. Pode levar
-          até um minuto.
+          Padronizando os dados e calculando os indicadores. Pode levar até um minuto.
         </template>
       </p>
       <p class="mt-2 text-xs tabular-nums text-mist-500">{{ segundos }} s decorridos</p>
@@ -229,7 +227,7 @@ function formatarDuracao(ms) {
 
       <div v-if="upload.resultado.avisos?.length" class="mt-4">
         <h3 class="text-xs font-semibold uppercase tracking-wide text-mist-400">
-          Avisos do tratamento
+          Avisos
         </h3>
         <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-mist-300">
           <li v-for="(aviso, indice) in upload.resultado.avisos.slice(0, 4)" :key="indice">

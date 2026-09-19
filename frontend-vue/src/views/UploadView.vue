@@ -28,8 +28,7 @@ const COLUNAS_ESPERADAS = [
     <main class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
       <h1 class="text-2xl font-semibold text-white sm:text-3xl">Enviar planilha</h1>
       <p class="mt-2 max-w-2xl text-sm text-mist-400">
-        A planilha é validada aqui, tratada por rotinas em Python no servidor e gravada no banco.
-        Variações de escrita, espaços sobrando e células em branco são resolvidos automaticamente.
+        Envie a planilha de clientes para atualizar os indicadores e as análises da carteira.
       </p>
 
       <div class="mt-8 grid gap-6 lg:grid-cols-5">
@@ -54,10 +53,6 @@ const COLUNAS_ESPERADAS = [
               <span v-if="!coluna.obrigatoria" class="text-[0.7rem] text-mist-500">opcional</span>
             </li>
           </ul>
-          <p class="mt-4 text-xs leading-relaxed text-mist-500">
-            Segue o modelo da aula. Maiúsculas, acentos e espaços no cabeçalho são normalizados
-            antes da validação, e a planilha original da CTI também é aceita.
-          </p>
         </aside>
       </div>
 
@@ -68,9 +63,9 @@ const COLUNAS_ESPERADAS = [
       >
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 class="text-sm font-semibold text-white">Prévia dos dados tratados</h2>
+            <h2 class="text-sm font-semibold text-white">Prévia dos dados</h2>
             <p class="mt-1 text-xs text-mist-500">
-              Lida no navegador, antes do envio. O tratamento definitivo é feito no servidor.
+              Confira se os dados estão corretos antes de enviar.
             </p>
           </div>
           <dl class="flex gap-6">
@@ -87,6 +82,24 @@ const COLUNAS_ESPERADAS = [
               </dd>
             </div>
           </dl>
+        </div>
+
+        <!-- O que o tratamento corrige sozinho: o usuário não precisa mexer na planilha. -->
+        <div
+          v-if="upload.ajustes.length"
+          class="mt-4 rounded-lg border border-trust-400/20 bg-trust-500/5 px-4 py-3"
+        >
+          <p class="text-sm font-medium text-trust-300">Ajustes automáticos</p>
+          <p class="mt-0.5 text-xs text-mist-500">
+            Escritas diferentes do mesmo valor são unificadas antes da análise.
+          </p>
+          <ul class="mt-2 space-y-1.5 text-xs text-mist-300">
+            <li v-for="ajuste in upload.ajustes" :key="ajuste.rotulo">
+              <span class="font-medium text-mist-100">{{ ajuste.rotulo }}:</span>
+              {{ ajuste.linhas }} {{ ajuste.linhas > 1 ? 'linhas padronizadas' : 'linha padronizada' }}
+              <span class="text-mist-500">— ex.: {{ ajuste.exemplos.join(' · ') }}</span>
+            </li>
+          </ul>
         </div>
 
         <div class="mt-4 overflow-x-auto">

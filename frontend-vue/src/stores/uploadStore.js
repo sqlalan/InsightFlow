@@ -62,6 +62,21 @@ const SEGMENTOS = {
   TECNOLOGIA: 'Tecnologia',
 }
 
+/** Campos que a prévia compara com a planilha original para listar os ajustes. */
+const CAMPOS_PADRONIZADOS = [
+  { campo: 'segmento', rotulo: 'Segmento' },
+  { campo: 'consultor', rotulo: 'Consultor' },
+  { campo: 'nivel', rotulo: 'Nível' },
+]
+
+/** "Linha 32 (CTI031)" ou "Linhas 32 (CTI031), 40 (CTI039) e mais 2". */
+function ondeEsta(clientes) {
+  const referencias = clientes.map((c) => (c.codigo ? `${c.linha} (${c.codigo})` : `${c.linha}`))
+  const primeiras = referencias.slice(0, 3).join(', ')
+  const resto = referencias.length > 3 ? ` e mais ${referencias.length - 3}` : ''
+  return `${referencias.length > 1 ? 'Linhas' : 'Linha'} ${primeiras}${resto}`
+}
+
 /** Tira acento, pontuacao e espaco para comparar textos escritos de formas diferentes. */
 function normalizarCabecalho(texto) {
   return String(texto ?? '')
@@ -91,22 +106,44 @@ export const useUploadStore = defineStore('upload', {
     arquivo: null,
     dadosOriginais: [],
     dadosTratados: [],
+    // erros impedem o envio (arquivo inválido); avisos só informam o que o tratamento vai corrigir.
     erros: [],
+    avisos: [],
     carregando: false,
     enviando: false,
     progresso: 0,
     resultado: null,
-    // Separado de `erros`: aquilo são avisos da prévia; isto é a API recusando o envio.
+    // Separado de `erros`: aquilo é a prévia no navegador; isto é a API recusando o envio.
     erroEnvio: null,
   }),
 
   getters: {
     totalClientes: (state) => state.dadosTratados.length,
     totalErros: (state) => state.erros.length,
+    totalAvisos: (state) => state.avisos.length,
     clientesNivelA: (state) => state.dadosTratados.filter((c) => c.nivel === 'A').length,
     temDados: (state) => state.dadosTratados.length > 0,
     /** A tabela mostra só o começo: 500 linhas na tela não ajudam a conferir nada. */
     previa: (state) => state.dadosTratados.slice(0, LINHAS_NA_PREVIA),
+
+    /**
+     * O que o tratamento corrige sozinho, campo a campo: quantas linhas mudaram
+     * e alguns exemplos de "como veio" -> "como fica".
+     */
+    ajustes: (state) =>
+      CAMPOS_PADRONIZADOS.map(({ campo, rotulo }) => {
+        const trocas = new Map()
+        let linhas = 0
+        for (const cliente of state.dadosTratados) {
+          const original = String(cliente.original[campo] ?? '')
+          // Célula vazia não é ajuste: vira aviso em validarConteudo().
+          if (!original.trim() || original === cliente[campo]) continue
+          linhas += 1
+          trocas.set(original, cliente[campo])
+        }
+        const exemplos = [...trocas].slice(0, 3).map(([de, para]) => `"${de}" → ${para}`)
+        return { rotulo, linhas, exemplos }
+      }).filter((ajuste) => ajuste.linhas > 0),
   },
 
   actions: {
@@ -141,6 +178,7 @@ export const useUploadStore = defineStore('upload', {
     /** Le a planilha no navegador e monta a previa. Nada sai da maquina aqui. */
     async processarPlanilha() {
       this.erros = []
+      this.avisos = []
       if (!this.validarArquivo()) return false
 
       this.carregando = true
@@ -156,7 +194,7 @@ export const useUploadStore = defineStore('upload', {
         }
 
         this.dadosOriginais = linhas
-        this.dadosTratados = linhas.map((linha) => this.tratarLinha(linha))
+        this.dadosTratados = linhas.map((linha, indice) => this.tratarLinha(linha, indice))
         this.validarConteudo()
         return true
       } catch {
@@ -168,7 +206,7 @@ export const useUploadStore = defineStore('upload', {
     },
 
     /** Renomeia as colunas para um nome só e padroniza os campos de texto. */
-    tratarLinha(linha) {
+    tratarLinha(linha, indice) {
       const tratada = {}
 
       for (const [cabecalho, valor] of Object.entries(linha)) {
@@ -179,6 +217,16 @@ export const useUploadStore = defineStore('upload', {
       const segmento = chaveDeSegmento(tratada.segmento)
 
       return {
+        // Número da linha no Excel, para o aviso dizer onde corrigir. O SheetJS
+        // guarda a posição em __rowNum__ (começa em 0); sem ele, conta a partir
+        // da linha 2, logo abaixo do cabeçalho.
+        linha: (linha.__rowNum__ ?? indice + 1) + 1,
+        // Valores como vieram, para a tela mostrar o que foi padronizado.
+        original: {
+          segmento: tratada.segmento,
+          consultor: tratada.consultor,
+          nivel: tratada.nivel,
+        },
         codigo: String(tratada.codigo ?? '').trim().toUpperCase(),
         nome: padronizarNome(tratada.nome),
         consultor: padronizarNome(tratada.consultor),
@@ -195,32 +243,43 @@ export const useUploadStore = defineStore('upload', {
       }
     },
 
-    /** Aponta o que o usuário precisa corrigir na planilha antes de enviar. */
+    /** Aponta problemas no conteúdo. Não bloqueia: diz o que o tratamento vai fazer com cada um. */
     validarConteudo() {
-      const vistos = new Set()
-      const duplicados = new Set()
-      let semCodigo = 0
-      let nivelInvalido = 0
+      const linhasPorCodigo = new Map()
+      const semCodigo = []
+      const nivelInvalido = []
+      const semFaturamento = []
+      const semServico = []
+      const semConsultor = []
 
       for (const cliente of this.dadosTratados) {
         if (!cliente.codigo) {
-          semCodigo += 1
+          semCodigo.push(cliente)
           continue
         }
-        if (vistos.has(cliente.codigo)) duplicados.add(cliente.codigo)
-        vistos.add(cliente.codigo)
-        if (!['A', 'B', 'C'].includes(cliente.nivel)) nivelInvalido += 1
+        linhasPorCodigo.set(cliente.codigo, [...(linhasPorCodigo.get(cliente.codigo) ?? []), cliente.linha])
+        if (!['A', 'B', 'C'].includes(cliente.nivel)) nivelInvalido.push(cliente)
+        if (String(cliente.faturamento).trim() === '') semFaturamento.push(cliente)
+        if (!cliente.servicos) semServico.push(cliente)
+        if (!cliente.consultor) semConsultor.push(cliente)
       }
 
-      if (semCodigo > 0) {
-        this.erros.push(`${semCodigo} linha(s) sem código do cliente — serão descartadas.`)
+      const avisar = (clientes, problema) => {
+        if (clientes.length) this.avisos.push(`${ondeEsta(clientes)}: ${problema}`)
       }
-      if (duplicados.size > 0) {
-        this.erros.push(`Código repetido: ${[...duplicados].slice(0, 5).join(', ')}.`)
+
+      avisar(semCodigo, 'sem código do cliente. Não entra na análise.')
+      for (const [codigo, linhas] of linhasPorCodigo) {
+        if (linhas.length > 1) {
+          this.avisos.push(
+            `${codigo} aparece nas linhas ${linhas.join(' e ')}. Vale a última (linha ${linhas.at(-1)}).`,
+          )
+        }
       }
-      if (nivelInvalido > 0) {
-        this.erros.push(`${nivelInvalido} linha(s) com nível fora de A, B ou C.`)
-      }
+      avisar(nivelInvalido, 'nível fora de A, B ou C. Será classificado como C.')
+      avisar(semFaturamento, 'sem faturamento. Fica fora dos cálculos de faturamento.')
+      avisar(semServico, 'sem serviço contratado. Nenhum contrato é registrado.')
+      avisar(semConsultor, 'sem consultor. Fica como "Não informado".')
     },
 
     /**
@@ -251,6 +310,7 @@ export const useUploadStore = defineStore('upload', {
       this.dadosOriginais = []
       this.dadosTratados = []
       this.erros = []
+      this.avisos = []
       this.progresso = 0
       this.resultado = null
       this.erroEnvio = null
