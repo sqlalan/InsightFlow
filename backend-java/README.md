@@ -9,17 +9,28 @@ Requisito único: **JDK 21 ou superior**. O Maven não precisa estar instalado �
 o wrapper (`mvnw`) baixa a versão correta na primeira execução.
 
 ```bash
-# banco em memória (não precisa do Neon)
+# banco em memória (não precisa do Azure)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
-# apontando para o Neon
-export DB_URL="jdbc:postgresql://<host>.neon.tech/<base>?sslmode=require"
+# apontando para o PostgreSQL no Azure
+export DB_URL="jdbc:postgresql://<servidor>.postgres.database.azure.com:5432/<base>?sslmode=require"
 export DB_USERNAME="..."
 export DB_PASSWORD="..."
 ./mvnw spring-boot:run
 ```
 
 No Windows (PowerShell/cmd), troque `./mvnw` por `mvnw.cmd`.
+
+### Banco no Azure
+
+O banco de produção é o **Azure Database for PostgreSQL (Flexible Server)**. A
+API só precisa das três variáveis acima; nada no código depende do provedor.
+
+- `sslmode=require` na URL: o Azure recusa conexão sem SSL.
+- Em **Rede**, liberar no firewall o IP de quem acessa o banco (a máquina de
+  desenvolvimento e o servidor onde a API estiver publicada).
+- As tabelas são criadas pelo Hibernate na primeira execução
+  (`ddl-auto=update`); `database/schema.sql` documenta o mesmo modelo.
 
 O `AnaliseService` procura o interpretador Python testando `python3`, `python` e
 `py` nessa ordem — não é preciso configurar nada no caso comum. Para apontar um
@@ -29,7 +40,7 @@ interpretador específico (um virtualenv, por exemplo), use `PYTHON_BIN`.
 
 | Variável | Padrão | Para que serve |
 | -------- | ------ | -------------- |
-| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | PostgreSQL local | conexão com o Neon |
+| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | PostgreSQL local | conexão com o PostgreSQL no Azure |
 | `CORS_ORIGINS` | `http://localhost:5173,http://localhost:4173` | domínios liberados (Vercel em produção) |
 | `PYTHON_BIN` | detectado | forca um interpretador Python especifico |
 | `ANALYTICS_DIR` | `../analytics-python` | pasta do módulo de Ciência de Dados |

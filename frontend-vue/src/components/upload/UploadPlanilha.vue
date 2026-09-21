@@ -1,55 +1,35 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { enviarPlanilha } from '../../services/api'
+import { computed, ref, watch } from 'vue'
+import { useUploadStore } from '../../stores/uploadStore'
+import ModalEnvio from './ModalEnvio.vue'
 
-const emit = defineEmits(['processada'])
+const upload = useUploadStore()
 
-const EXTENSOES = ['.xlsx', '.xls']
-const TAMANHO_MAXIMO = 10 * 1024 * 1024
-
-const arquivo = ref(null)
+// Estado que é só da interface fica no componente; o resto mora no store.
 const arrastando = ref(false)
-const enviando = ref(false)
-const progresso = ref(0)
-const erro = ref(null)
 const campo = ref(null)
+const confirmando = ref(false)
 
-// `<` dentro de interpolação confunde o parser de template: o rótulo vem pronto daqui.
-const rotuloProgresso = computed(() =>
-  progresso.value >= 100 ? 'Tratando os dados no servidor…' : `Enviando… ${progresso.value}%`,
+// Quando o store é limpo (envio concluído, "Remover"), o input também precisa
+// esquecer o arquivo -- senão escolher o mesmo arquivo de novo não dispara @change.
+watch(
+  () => upload.arquivo,
+  (arquivo) => {
+    if (!arquivo && campo.value) campo.value.value = ''
+  },
 )
 
 const tamanhoLegivel = computed(() => {
-  if (!arquivo.value) return ''
-  const mb = arquivo.value.size / 1024 / 1024
-  return mb < 1 ? `${Math.round(arquivo.value.size / 1024)} KB` : `${mb.toFixed(1)} MB`
+  if (!upload.arquivo) return ''
+  const mb = upload.arquivo.size / 1024 / 1024
+  return mb < 1 ? `${Math.round(upload.arquivo.size / 1024)} KB` : `${mb.toFixed(1)} MB`
 })
 
-/** Validação no navegador: evita subir arquivo que a API já recusaria. */
-function validar(candidato) {
-  const nome = candidato.name.toLowerCase()
-  if (!EXTENSOES.some((extensao) => nome.endsWith(extensao))) {
-    return 'Formato não suportado. Envie a planilha em .xlsx ou .xls.'
-  }
-  if (candidato.size > TAMANHO_MAXIMO) {
-    return 'O arquivo passa de 10 MB. Exporte apenas a aba de clientes.'
-  }
-  if (candidato.size === 0) {
-    return 'O arquivo está vazio.'
-  }
-  return null
-}
-
-function selecionar(candidato) {
+/** Ao escolher o arquivo já montamos a prévia — o envio fica para o botão. */
+async function selecionar(candidato) {
   if (!candidato) return
-  const problema = validar(candidato)
-  if (problema) {
-    erro.value = { mensagem: problema, detalhes: [] }
-    arquivo.value = null
-    return
-  }
-  erro.value = null
-  arquivo.value = candidato
+  upload.selecionarArquivo(candidato)
+  await upload.processarPlanilha()
 }
 
 function aoSoltar(evento) {
@@ -57,23 +37,8 @@ function aoSoltar(evento) {
   selecionar(evento.dataTransfer?.files?.[0])
 }
 
-async function enviar() {
-  if (!arquivo.value || enviando.value) return
-  enviando.value = true
-  erro.value = null
-  progresso.value = 0
-  try {
-    const resultado = await enviarPlanilha(arquivo.value, (valor) => {
-      progresso.value = valor
-    })
-    emit('processada', resultado)
-    arquivo.value = null
-    if (campo.value) campo.value.value = ''
-  } catch (falha) {
-    erro.value = { mensagem: falha.message, detalhes: falha.detalhes ?? [] }
-  } finally {
-    enviando.value = false
-  }
+function remover() {
+  upload.limpar()
 }
 </script>
 
@@ -81,7 +46,7 @@ async function enviar() {
   <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6 sm:p-8">
     <h2 class="text-lg font-semibold text-white">Envio da planilha</h2>
     <p class="mt-1 text-sm text-mist-400">
-      Aceita a planilha da CTI mesmo despadronizada — o tratamento é feito no servidor.
+      Selecione o arquivo, confira a prévia e confirme o envio.
     </p>
 
     <label
@@ -113,48 +78,64 @@ async function enviar() {
     </label>
 
     <div
-      v-if="arquivo"
+      v-if="upload.arquivo"
       class="mt-4 flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-ink-950/60 px-4 py-3"
     >
       <div class="min-w-0">
-        <p class="truncate text-sm font-medium text-mist-100">{{ arquivo.name }}</p>
-        <p class="text-xs text-mist-500">{{ tamanhoLegivel }}</p>
+        <p class="truncate text-sm font-medium text-mist-100">{{ upload.arquivo.name }}</p>
+        <p class="text-xs text-mist-500">
+          {{ tamanhoLegivel }}
+          <span v-if="upload.temDados"> · {{ upload.totalClientes }} linhas lidas</span>
+        </p>
       </div>
       <button
         type="button"
         class="shrink-0 rounded-md px-2 py-1 text-xs text-mist-400 transition hover:text-white"
-        @click="arquivo = null"
+        @click="remover"
       >
         Remover
       </button>
     </div>
 
-    <div v-if="erro" role="alert" class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
-      <p class="text-sm font-medium text-red-200">{{ erro.mensagem }}</p>
-      <ul v-if="erro.detalhes.length" class="mt-2 list-disc pl-5 text-xs text-red-200/80">
-        <li v-for="detalhe in erro.detalhes" :key="detalhe">{{ detalhe }}</li>
+    <p v-if="upload.carregando" class="mt-4 text-sm text-mist-400">Lendo a planilha…</p>
+
+    <!-- Vermelho: o arquivo não pode ser enviado. -->
+    <div
+      v-if="upload.totalErros > 0"
+      role="alert"
+      class="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3"
+    >
+      <ul class="space-y-1 text-sm text-red-200">
+        <li v-for="(erro, indice) in upload.erros" :key="indice">{{ erro }}</li>
       </ul>
     </div>
 
-    <div v-if="enviando" class="mt-4">
-      <div class="h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div
-          class="h-full rounded-full bg-flow-400 transition-all duration-200"
-          :style="{ width: `${progresso}%` }"
-        />
-      </div>
-      <p class="mt-2 text-xs text-mist-400">
-        {{ rotuloProgresso }}
+    <!-- Amarelo: dá para enviar; o tratamento corrige o que está listado. -->
+    <div
+      v-if="upload.totalAvisos > 0"
+      role="status"
+      class="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
+    >
+      <p class="text-sm font-medium text-amber-200">
+        {{ upload.totalAvisos }} aviso(s) na planilha
+      </p>
+      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-100/80">
+        <li v-for="(aviso, indice) in upload.avisos" :key="indice">{{ aviso }}</li>
+      </ul>
+      <p class="mt-2 text-xs text-amber-100/60">
+        Os avisos não impedem o envio. Para corrigir, ajuste essas linhas na planilha e envie de novo.
       </p>
     </div>
 
     <button
       type="button"
       class="mt-6 w-full rounded-lg bg-flow-500 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:bg-flow-400 disabled:cursor-not-allowed disabled:opacity-40"
-      :disabled="!arquivo || enviando"
-      @click="enviar"
+      :disabled="!upload.temDados || upload.enviando"
+      @click="confirmando = true"
     >
-      {{ enviando ? 'Processando…' : 'Enviar e analisar' }}
+      Enviar e analisar
     </button>
+
+    <ModalEnvio v-model="confirmando" />
   </div>
 </template>

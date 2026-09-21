@@ -1,11 +1,13 @@
 # ---------------------------------------------------------------------------
 # Dados da CTI - NUNCA versionar
-# A planilha real da empresa e confidencial (ver docs/relacoes-humanas.md).
+# A planilha real da empresa e confidencial (ver README, Confidencialidade).
 # ---------------------------------------------------------------------------
 *.xlsx
 *.xls
 *.csv
 !analytics-python/output/.gitkeep
+# Exceção: modelo da aula, com dados fictícios, usado para testar o upload.
+!analytics-python/exemplos/CTI_Insights_modelo_upload_aula.xlsx
 backend-java/uploads/
 
 # ---------------------------------------------------------------------------

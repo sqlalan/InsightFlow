@@ -2,7 +2,7 @@
 Traducao das estatisticas em frases de negocio.
 
 Numero solto nao ajuda o consultor da CTI: o que aparece no dashboard e o texto
-"Industria concentra 42,1% da carteira". Cada funcao daqui devolve dicionarios no
+"Indústria concentra 42,1% da carteira". Cada funcao daqui devolve dicionarios no
 formato que o Back-end Java sabe converter em InsightSegmento, InsightFaturamento
 e InsightServico.
 """
@@ -14,8 +14,9 @@ from collections import Counter
 import pandas as pd
 
 
-def _moeda(valor: float) -> str:
-    return f"R$ {valor:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+def _decimal(valor: float) -> str:
+    """1.8 -> '1,8': o texto vai para a tela em português."""
+    return f"{valor:.1f}".replace(".", ",")
 
 
 def insight_segmentos(df: pd.DataFrame) -> list[dict]:
@@ -32,8 +33,8 @@ def insight_segmentos(df: pd.DataFrame) -> list[dict]:
         "segmento": lider,
         "participacao_percentual": round(participacao, 2),
         "descricao": (
-            f"Sao {int(contagem.iloc[0])} de {total} clientes. "
-            "Esforco comercial concentrado aqui rende mais por contato."
+            f"São {int(contagem.iloc[0])} de {total} clientes. "
+            "Concentrar o esforço comercial aqui rende mais por contato."
         ),
     }]
 
@@ -45,8 +46,8 @@ def insight_segmentos(df: pd.DataFrame) -> list[dict]:
                 "segmento": ", ".join(cauda.index[:3]),
                 "participacao_percentual": round(float(cauda.sum()) / total * 100, 2),
                 "descricao": (
-                    "Segmentos com presenca marginal na carteira: ou viram frente de "
-                    "prospeccao, ou saem do foco comercial."
+                    "São segmentos com pouca presença na carteira: podem virar frente de "
+                    "prospecção ou sair do foco comercial."
                 ),
             })
     return resultado
@@ -60,34 +61,34 @@ def insight_faturamento(df: pd.DataFrame, estatisticas: dict) -> list[dict]:
 
     media = float(serie.mean())
     mediana = float(serie.median())
-    assimetria = "a carteira tem poucos clientes muito grandes puxando a media para cima"
+    assimetria = "Poucos clientes muito grandes puxam a média para cima"
     if media < mediana:
-        assimetria = "a carteira e puxada para baixo por um grupo de clientes menores"
+        assimetria = "Um grupo de clientes menores puxa a média para baixo"
     elif abs(media - mediana) / max(mediana, 1) < 0.1:
-        assimetria = "a carteira e homogenea: media e mediana praticamente iguais"
+        assimetria = "A carteira é homogênea: os valores são próximos entre os clientes"
 
     resultado = [{
         "tipo": "FATURAMENTO",
         "faturamento_medio": round(media, 2),
         "faturamento_mediano": round(mediana, 2),
-        "descricao": f"Com desvio padrao de {_moeda(float(serie.std(ddof=1)))}, {assimetria}.",
+        "descricao": f"{assimetria}.",
     }]
 
+    # O p-valor (Shapiro-Wilk) continua em indicadores.json; na tela vai só a leitura.
     normalidade = estatisticas.get("teste_normalidade", {})
     if normalidade.get("p_valor") is not None:
         normal = normalidade["p_valor"] > 0.05
         leitura = (
-            "distribuicao compativel com a normal, entao media e desvio padrao descrevem bem a carteira"
+            "O faturamento se distribui de forma equilibrada: a média representa bem o cliente típico."
             if normal
-            else "distribuicao longe da normal, entao mediana e quartis descrevem melhor a carteira do que a media"
+            else "O faturamento é desigual entre os clientes: o valor mediano representa melhor o "
+            "cliente típico do que a média."
         )
         resultado.append({
             "tipo": "FATURAMENTO",
-            "faturamento_medio": round(media, 2),
-            "faturamento_mediano": round(mediana, 2),
-            "descricao": (
-                f"Shapiro-Wilk com p = {normalidade['p_valor']:.4f}: {leitura}."
-            ),
+            "faturamento_medio": None,
+            "faturamento_mediano": None,
+            "descricao": leitura,
         })
     return resultado
 
@@ -103,7 +104,7 @@ def insight_servicos(df: pd.DataFrame) -> list[dict]:
         "tipo": "SERVICO",
         "servico": nome,
         "total_contratos": int(quantidade),
-        "descricao": "E o servico ancora da carteira e o candidato natural a pacote combinado.",
+        "descricao": "É o serviço principal da carteira e o candidato natural a um pacote combinado.",
     }]
 
     media_servicos = float(df["qtd_servicos"].mean())
@@ -112,10 +113,12 @@ def insight_servicos(df: pd.DataFrame) -> list[dict]:
         resultado.append({
             "tipo": "SERVICO",
             "servico": "Venda cruzada",
-            "total_contratos": um_servico,
+            # Sem total: o número aqui é de clientes, não de contratos.
+            "total_contratos": None,
             "descricao": (
-                f"{um_servico} clientes tem um unico servico contratado, contra media de "
-                f"{media_servicos:.1f} servicos por cliente: e a lista de abordagem mais curta para ampliar receita."
+                f"{um_servico} clientes têm um único serviço contratado, contra a média de "
+                f"{_decimal(media_servicos)} serviços por cliente. É a lista mais curta de "
+                "abordagem para ampliar a receita."
             ),
         })
     return resultado
@@ -126,28 +129,30 @@ def insight_niveis(df: pd.DataFrame, estatisticas: dict) -> list[dict]:
     if df.empty:
         return []
     proporcoes = df["nivel"].value_counts(normalize=True).mul(100).round(1).to_dict()
-    composicao = ", ".join(f"{nivel}: {valor}%" for nivel, valor in sorted(proporcoes.items()))
+    composicao = ", ".join(f"{nivel}: {_decimal(valor)}%" for nivel, valor in sorted(proporcoes.items()))
 
     resultado = [{
         "tipo": "SEGMENTO",
-        "segmento": "Composicao por nivel",
-        "participacao_percentual": float(proporcoes.get("A", 0.0)),
-        "descricao": f"Distribuicao da carteira por classificacao ({composicao}).",
+        "segmento": "Composição por nível",
+        "participacao_percentual": None,
+        "descricao": f"Distribuição da carteira por nível de cliente: {composicao}.",
     }]
 
+    # O p-valor (qui-quadrado) continua em indicadores.json; na tela vai só a leitura.
     associacao = estatisticas.get("teste_associacao", {})
     if associacao.get("p_valor") is not None:
         dependente = associacao["p_valor"] < 0.05
         leitura = (
-            "ha associacao estatistica entre segmento e nivel: o perfil de cliente muda conforme o setor"
+            "O nível do cliente muda conforme o segmento: cada setor tem um perfil próprio."
             if dependente
-            else "nao ha associacao estatistica entre segmento e nivel: a classificacao se distribui de forma parecida entre os setores"
+            else "O nível do cliente não depende do segmento: a classificação se distribui de "
+            "forma parecida entre os setores."
         )
         resultado.append({
             "tipo": "SEGMENTO",
-            "segmento": "Segmento x nivel",
+            "segmento": "Segmento x nível",
             "participacao_percentual": None,
-            "descricao": f"Qui-quadrado com p = {associacao['p_valor']:.4f}: {leitura}.",
+            "descricao": leitura,
         })
     return resultado
 
@@ -156,11 +161,11 @@ def insight_qualidade(relatorio: dict) -> list[dict]:
     """Transparencia sobre o que a planilha nao entregou (exigencia das hipoteses)."""
     problemas = []
     if relatorio.get("codigos_duplicados_removidos"):
-        problemas.append(f"{relatorio['codigos_duplicados_removidos']} codigos CTI duplicados")
+        problemas.append(f"{relatorio['codigos_duplicados_removidos']} código(s) de cliente repetido(s)")
     if relatorio.get("faturamento_ausente"):
-        problemas.append(f"{relatorio['faturamento_ausente']} clientes sem faturamento informado")
+        problemas.append(f"{relatorio['faturamento_ausente']} cliente(s) sem faturamento informado")
     if relatorio.get("clientes_sem_servico"):
-        problemas.append(f"{relatorio['clientes_sem_servico']} clientes sem servico informado")
+        problemas.append(f"{relatorio['clientes_sem_servico']} cliente(s) sem serviço informado")
     if not problemas:
         return []
     return [{
@@ -168,8 +173,8 @@ def insight_qualidade(relatorio: dict) -> list[dict]:
         "segmento": "Qualidade dos dados",
         "participacao_percentual": None,
         "descricao": (
-            "A base recebida tinha " + ", ".join(problemas)
-            + ". As analises que dependem desses campos tem alcance reduzido."
+            "A planilha recebida tinha " + ", ".join(problemas)
+            + ". As análises que dependem desses campos ficam menos precisas."
         ),
     }]
 

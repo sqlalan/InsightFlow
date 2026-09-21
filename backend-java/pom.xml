@@ -45,7 +45,7 @@
       <artifactId>poi-ooxml</artifactId>
       <version>5.4.0</version>
     </dependency>
-    <!-- banco em memoria do perfil "local": permite rodar a API sem o Neon -->
+    <!-- banco em memoria do perfil "local": permite rodar a API sem o banco do Azure -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>

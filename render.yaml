@@ -18,7 +18,7 @@ services:
     healthCheckPath: /api/indicadores
     envVars:
       - key: DB_URL
-        sync: false        # jdbc:postgresql://<host>.neon.tech/<base>?sslmode=require
+        sync: false        # jdbc:postgresql://<servidor>.postgres.database.azure.com:5432/<base>?sslmode=require
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD

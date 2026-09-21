@@ -27,9 +27,9 @@ em Python, guarda tudo em banco na nuvem, calcula estatísticas e apresenta os
 insights em um dashboard.
 
 ```
-Planilha  →  Vue 3       →  Spring Boot  →  Python        →  Neon        →  Dashboards
-Excel        (Front-end)    (API Java)      (Ciência de      (PostgreSQL)   (Chart.js)
-                                             Dados)
+Planilha  →  Vue 3       →  Spring Boot  →  Python        →  Azure       →  Dashboards
+Excel        (Front-end)    (API Java)      (Ciência de      Database for   (Chart.js)
+                                             Dados)          PostgreSQL
 ```
 
 ## Hipóteses do projeto
@@ -56,7 +56,8 @@ InsightFlow/
 ├── frontend-vue/       [Vue 3 + Vite + Tailwind + Chart.js]
 │   ├── src/
 │   │   ├── components/   home/, layout/, upload/, dashboard/
-│   │   ├── views/        HomeView, LoginView, UploadView, DashboardView
+│   │   ├── views/        HomeView, LoginView, UploadView, DashboardView, RelatoriosView
+│   │   ├── stores/       uploadStore.js (Pinia: leitura e prévia da planilha)
 │   │   ├── router/       rotas + título da página
 │   │   └── services/     api.js (axios + tratamento de erro)
 │   ├── package.json
@@ -64,18 +65,17 @@ InsightFlow/
 ├── backend-java/       [Spring Boot 3 + JPA]
 │   ├── src/main/java/br/senai/ctiinsights/
 │   │   ├── controller/  services/  repository/  domain/  dto/  exception/  config/
+│   ├── src/test/java/   testes da validação da planilha e das faixas
 │   ├── Dockerfile
 │   └── pom.xml
 ├── analytics-python/   [Python + Pandas + SciPy + Matplotlib]
 │   ├── limpeza.py  analise.py  insights.py  graficos.py
-│   ├── gerar_planilha_exemplo.py
+│   ├── tests/          testes do tratamento (unittest)
+│   ├── exemplos/       modelo da aula para testar o upload (dados fictícios)
 │   ├── requirements.txt
 │   └── output/         clientes.json, indicadores.json, insights.json, graficos/
 ├── database/           [PostgreSQL]
 │   └── schema.sql
-├── docs/
-│   ├── automacao-industrial.md
-│   └── relacoes-humanas.md
 └── render.yaml
 ```
 
@@ -88,15 +88,14 @@ InsightFlow/
 ```bash
 cd analytics-python
 pip install -r requirements.txt
-python gerar_planilha_exemplo.py                       # planilha de teste despadronizada
-python analise.py --entrada planilha_exemplo.xlsx --saida output
+python analise.py --entrada exemplos/CTI_Insights_modelo_upload_aula.xlsx --saida output
 ```
 
 ### 2. API
 
 ```bash
 cd backend-java
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local   # H2 em memória, sem precisar do Neon
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local   # H2 em memória, sem precisar do Azure
 ```
 
 No Windows (PowerShell/cmd), use `mvnw.cmd` no lugar de `./mvnw`. Não é preciso
@@ -116,7 +115,24 @@ cp .env.example .env.development
 npm run dev
 ```
 
-Telas: `/` landing · `/login` · `/upload` envio da planilha · `/dashboard` insights.
+Telas: `/` landing · `/login` · `/upload` envio da planilha · `/dashboard` indicadores ·
+`/relatorios` histórico, insights e exportação.
+
+### 4. Testes
+
+```bash
+cd analytics-python && python -m unittest discover tests   # tratamento da planilha
+cd backend-java && ./mvnw test                               # validação e faixas de faturamento
+```
+
+### Modelo da planilha
+
+O cabeçalho segue o modelo da aula: `codigo_cliente`, `nome_cliente`, `consultor`,
+`segmento`, `nivel_cliente`, `faturamento_anual`, `servicos_contratados`,
+`data_contratacao`, `cidade`, `uf`. Para testar, envie
+`analytics-python/exemplos/CTI_Insights_modelo_upload_aula.xlsx`. Os sinônimos aceitos ficam em dois lugares que
+precisam andar juntos: `EQUIVALENTES` em `PlanilhaService.java` e `equivalentes` em
+`limpeza.py`.
 
 ---
 
@@ -124,12 +140,12 @@ Telas: `/` landing · `/login` · `/upload` envio da planilha · `/dashboard` in
 
 | UC | O que entrega | Onde está |
 | -- | ------------- | --------- |
-| **Frameworks Front-end** | telas de upload e dashboard, 4 gráficos, layout responsivo, consumo da API com tratamento de erro | `frontend-vue/` |
+| **Frameworks Front-end** | telas de upload, dashboard e relatórios, 4 gráficos, Pinia, layout responsivo, consumo da API com tratamento de erro | `frontend-vue/` |
 | **Desenvolvimento Back-end** | modelo de classes, CRUD REST completo, 3 exceções customizadas, chamada do Python via `ProcessBuilder`, CORS | `backend-java/` |
 | **Ciência de Dados** | padronização da planilha, estatística descritiva, testes de hipótese, correlação, 6 gráficos, lista de insights | `analytics-python/` |
-| **Automação Industrial** | integração entre sistemas, comparação HTTP/REST × Modbus, dashboards como painel de monitoramento, registro do que não se aplica | [`docs/automacao-industrial.md`](docs/automacao-industrial.md) |
-| **Computação em Nuvem** | publicação em Vercel + Render + Neon, variáveis de ambiente, HTTPS, monitoramento | `render.yaml`, `frontend-vue/vercel.json`, `backend-java/Dockerfile` |
-| **Relações Humanas e Cidadania** | divisão de tarefas, confidencialidade dos dados da CTI, reflexão sobre LGPD | [`docs/relacoes-humanas.md`](docs/relacoes-humanas.md) |
+| **Automação Industrial** | integração entre sistemas, dashboards como painel de monitoramento, histórico de processamento | `backend-java/` (`TelemetriaService`), `frontend-vue/` (Relatórios) |
+| **Computação em Nuvem** | publicação em Vercel + Render + Azure Database for PostgreSQL, variáveis de ambiente, HTTPS, monitoramento | `render.yaml`, `frontend-vue/vercel.json`, `backend-java/Dockerfile` |
+| **Relações Humanas e Cidadania** | divisão de tarefas, confidencialidade dos dados da CTI, reflexão sobre LGPD | seção [Confidencialidade](#confidencialidade) |
 
 ---
 
@@ -137,7 +153,7 @@ Telas: `/` landing · `/login` · `/upload` envio da planilha · `/dashboard` in
 
 | Na planilha da CTI | Depois do tratamento |
 | ------------------ | -------------------- |
-| `"IND."`, `"Industria"`, `"INDUSTRIA"`, `"industria "` | `Industria` |
+| `"IND."`, `"Industria"`, `"INDUSTRIA"`, `"industria "` | `Indústria` |
 | `"a"`, `" B"`, `"Nivel A"`, `"classe c"` | `A`, `B`, `C` |
 | `"R$ 1.250.000,00"`, `"1,2 mi"`, `"90 mil"`, `"Ate 360 mil"` | valor numérico em reais |
 | `"Link Dedicado; cloud / TELEFONIA"` | lista de três serviços padronizados |
@@ -164,7 +180,7 @@ Telas: `/` landing · `/login` · `/upload` envio da planilha · `/dashboard` in
 | ------ | ------- | ----- |
 | Front-end | Vercel | gratuito |
 | API + Python | Render (Docker) | gratuito |
-| Banco | Neon PostgreSQL | gratuito |
+| Banco | Azure Database for PostgreSQL (Flexible Server) | conta Azure for Students / gratuita |
 
 Java e Python ficam no **mesmo container** porque o `ProcessBuilder` só enxerga
 um processo local. Nenhuma credencial está no repositório: tudo vem de variável
@@ -173,15 +189,13 @@ de ambiente (`render.yaml` e `.env.example`).
 ## Confidencialidade
 
 A planilha real da CTI **não é versionada**. O `.gitignore` bloqueia `*.xlsx`,
-`*.xls` e `*.csv`, e todo o desenvolvimento usa a base sintética gerada por
-`gerar_planilha_exemplo.py`. Detalhes em
-[`docs/relacoes-humanas.md`](docs/relacoes-humanas.md).
+`*.xls` e `*.csv`, e todo o desenvolvimento usa a planilha modelo da aula
+(`analytics-python/exemplos/CTI_Insights_modelo_upload_aula.xlsx`), com dados
+fictícios — é o único `.xlsx` liberado no `.gitignore`.
 
 ## Pendências conhecidas
 
 - Autenticação: a tela de login valida no cliente e abre o painel; o endpoint
   `POST /api/auth/login` ainda não existe. Sem isso, não deve receber dados
   reais da empresa.
-- Preencher os nomes do grupo na tabela de divisão de tarefas.
 - Links de "Esqueci minha senha", SSO, termos e privacidade apontam para `#`.
-- Valores da seção de planos da landing são de referência.

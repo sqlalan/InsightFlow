@@ -26,30 +26,30 @@ COLUNAS_OBRIGATORIAS = [
 
 # Variacoes de escrita encontradas na planilha -> forma canonica.
 SEGMENTOS_CANONICOS = {
-    "ind": "Industria",
-    "industria": "Industria",
-    "industrias": "Industria",
-    "industrial": "Industria",
-    "com": "Comercio",
-    "comercio": "Comercio",
-    "comercial": "Comercio",
-    "varejo": "Comercio",
-    "serv": "Servicos",
-    "servico": "Servicos",
-    "servicos": "Servicos",
-    "prestador de servicos": "Servicos",
+    "ind": "Indústria",
+    "industria": "Indústria",
+    "industrias": "Indústria",
+    "industrial": "Indústria",
+    "com": "Comércio",
+    "comercio": "Comércio",
+    "comercial": "Comércio",
+    "varejo": "Comércio",
+    "serv": "Serviços",
+    "servico": "Serviços",
+    "servicos": "Serviços",
+    "prestador de servicos": "Serviços",
     "gov": "Governo",
     "governo": "Governo",
     "publico": "Governo",
     "setor publico": "Governo",
-    "edu": "Educacao",
-    "educacao": "Educacao",
-    "ensino": "Educacao",
-    "saude": "Saude",
-    "hospitalar": "Saude",
-    "agro": "Agronegocio",
-    "agronegocio": "Agronegocio",
-    "rural": "Agronegocio",
+    "edu": "Educação",
+    "educacao": "Educação",
+    "ensino": "Educação",
+    "saude": "Saúde",
+    "hospitalar": "Saúde",
+    "agro": "Agronegócio",
+    "agronegocio": "Agronegócio",
+    "rural": "Agronegócio",
 }
 
 # Faixas escritas por extenso na planilha -> valor representativo em reais.
@@ -83,6 +83,11 @@ def normalizar_cabecalho(nome: object) -> str:
     base = normalizar_texto(nome)
     base = re.sub(r"[^a-z0-9]+", "_", base).strip("_")
     equivalentes = {
+        # Cabecalhos do modelo oficial da aula (CTI_Insights_modelo_upload_aula).
+        "codigo_cliente": "cliente_cti",
+        "nivel_cliente": "nivel",
+        "data_contratacao": "data_inicio",
+        # Variacoes da planilha original da CTI.
         "cliente": "cliente_cti",
         "codigo_cti": "cliente_cti",
         "cliente_cti_codigo": "cliente_cti",
@@ -102,10 +107,10 @@ def normalizar_cabecalho(nome: object) -> str:
 
 
 def padronizar_segmento(valor: object) -> str:
-    """Unifica as variacoes de escrita do segmento; vazio vira 'Nao informado'."""
+    """Unifica as variacoes de escrita do segmento; vazio vira 'Não informado'."""
     chave = normalizar_texto(valor)
     if not chave:
-        return "Nao informado"
+        return "Não informado"
     if chave in SEGMENTOS_CANONICOS:
         return SEGMENTOS_CANONICOS[chave]
     # Ainda tenta casar pelo comeco da palavra (ex.: "industria de alimentos").
@@ -198,7 +203,7 @@ def tratar(bruto: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df = bruto.copy()
 
     df["cliente_cti"] = df["cliente_cti"].map(lambda v: normalizar_texto(v).upper())
-    df["consultor"] = df["consultor"].map(lambda v: str(v).strip().title() if pd.notna(v) else "Nao informado")
+    df["consultor"] = df["consultor"].map(lambda v: str(v).strip().title() if pd.notna(v) else "Não informado")
     df["segmento"] = df["segmento"].map(padronizar_segmento)
     df["nivel"] = df["nivel"].map(padronizar_nivel)
     df["faturamento_anual"] = df["faturamento_anual"].map(converter_faturamento)
@@ -236,9 +241,9 @@ def tratar(bruto: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
 def classificar_faixa(faturamento: float | None) -> str:
     """Mesmos cortes usados no enum FaixaFaturamento do Back-end."""
     if faturamento is None or pd.isna(faturamento):
-        return "Nao informado"
+        return "Não informado"
     if faturamento <= 360_000:
-        return "Ate R$ 360 mil"
+        return "Até R$ 360 mil"
     if faturamento <= 4_800_000:
         return "R$ 360 mil a R$ 4,8 mi"
     if faturamento <= 30_000_000:

@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- Sistema CTI Insights - esquema do banco (PostgreSQL / Neon)
+-- Sistema CTI Insights - esquema do banco (PostgreSQL / Azure Database for PostgreSQL)
 --
 -- O Hibernate cria as tabelas sozinho (spring.jpa.hibernate.ddl-auto=update),
 -- mas este arquivo e a documentacao oficial do modelo: e o que a banca le para

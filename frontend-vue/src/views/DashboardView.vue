@@ -54,7 +54,7 @@ onMounted(carregar)
         <div>
           <h1 class="text-2xl font-semibold text-white sm:text-3xl">Dashboard da carteira</h1>
           <p class="mt-2 text-sm text-mist-400">
-            Indicadores calculados sobre a base tratada da CTI.
+            Indicadores da carteira de clientes da CTI.
           </p>
         </div>
         <button
@@ -74,8 +74,7 @@ onMounted(carregar)
       >
         <p class="text-sm font-medium text-red-200">{{ erro }}</p>
         <p class="mt-1 text-xs text-red-200/70">
-          Confira se a API está no ar e se
-          <code class="rounded bg-black/30 px-1">VITE_API_URL</code> aponta para o endereço certo.
+          Clique em Atualizar para tentar de novo.
         </p>
       </div>
 
@@ -102,7 +101,7 @@ onMounted(carregar)
           rotulo="Faturamento médio"
           formato="moeda"
           :valor="indicadores?.faturamentoMedio ?? 0"
-          :apoio="`Ticket por contrato: ${Math.round(ticketMedio).toLocaleString('pt-BR')}`"
+          :apoio="`Ticket por contrato: R$ ${Math.round(ticketMedio).toLocaleString('pt-BR')}`"
           :carregando="carregando"
         />
       </section>

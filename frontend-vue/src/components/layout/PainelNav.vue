@@ -9,6 +9,7 @@ const aberto = ref(false)
 const links = [
   { to: '/upload', label: 'Enviar planilha', icone: 'upload' },
   { to: '/dashboard', label: 'Dashboard', icone: 'grafico' },
+  { to: '/relatorios', label: 'Relatórios', icone: 'relatorio' },
 ]
 
 // no celular a lateral vira gaveta: navegar precisa fechar o que cobre a tela
@@ -104,11 +105,19 @@ watch(() => route.path, () => (aberto.value = false))
               stroke-linecap="round"
             />
           </template>
-          <template v-else>
+          <template v-else-if="link.icone === 'grafico'">
             <path d="M4 20h16" stroke-linecap="round" />
             <rect x="5" y="12" width="3.5" height="6" rx="1" />
             <rect x="10.25" y="8" width="3.5" height="10" rx="1" />
             <rect x="15.5" y="4" width="3.5" height="14" rx="1" />
+          </template>
+          <template v-else>
+            <path d="M14 3v4.5h4.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M19 8.5V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5H14z"
+              stroke-linejoin="round"
+            />
+            <path d="M8.5 12.5h7M8.5 16h4.5" stroke-linecap="round" />
           </template>
         </svg>
         {{ link.label }}
