@@ -76,6 +76,9 @@ InsightFlow/
 │   └── output/         clientes.json, indicadores.json, insights.json, graficos/
 ├── database/           [PostgreSQL]
 │   └── schema.sql
+├── docs/
+│   ├── diagrama/       diagrama-classes.png
+│   └── prototipos/     telas em .png (upload, dashboard, versões de celular)
 └── render.yaml
 ```
 
@@ -133,6 +136,25 @@ O cabeçalho segue o modelo da aula: `codigo_cliente`, `nome_cliente`, `consulto
 `analytics-python/exemplos/CTI_Insights_modelo_upload_aula.xlsx`. Os sinônimos aceitos ficam em dois lugares que
 precisam andar juntos: `EQUIVALENTES` em `PlanilhaService.java` e `equivalentes` em
 `limpeza.py`.
+
+---
+
+## Responsabilidades da equipe
+
+| Integrante | Responsabilidade | Evidência no repositório |
+| ---------- | ---------------- | ------------------------ |
+| **Alan Muterle da Silva** | Consolidação da entrega, repositório e cadastro na SAGA. Publicação nos serviços gratuitos | histórico do Git, `README.md`, `render.yaml`, `frontend-vue/vercel.json` |
+| **Raphael Reche** | Levantamento da problemática junto à CTI: uso atual da planilha, evidências de inconsistência e consequências. Confidencialidade dos dados e LGPD | seção [O problema](#o-problema), seção [Confidencialidade](#confidencialidade), `analytics-python/exemplos/CTI_Insights_modelo_upload_aula.xlsx` |
+| **Rogerio Bertolino** | Formulação e teste das hipóteses. Rotinas de tratamento e análise estatística dos dados | `analytics-python/limpeza.py`, `analytics-python/analise.py`, `analytics-python/insights.py`, `analytics-python/graficos.py`, `analytics-python/tests/test_limpeza.py` |
+| **Maycol Ticona** | Modelagem das classes do domínio e diagrama. Implementação da API e do banco | `docs/diagrama/diagrama-classes.png`, `backend-java/src/main/java/br/senai/ctiinsights/domain/`, `database/schema.sql`, `backend-java/src/test/java/` |
+| **Yasmin Bertolino** | Fluxo do usuário e protótipos das telas. Interface em Vue e gráficos do dashboard | `docs/prototipos/`, `frontend-vue/src/views/`, `frontend-vue/src/components/` |
+
+| Item | Onde está |
+| ---- | --------- |
+| Repositório | https://github.com/sqlalan/InsightFlow |
+| Branch de desenvolvimento | `projeto-integrador` (produção: `main`) |
+| Pasta do diagrama | `docs/diagrama/` — arquivo `diagrama-classes.png` |
+| Pasta dos protótipos | `docs/prototipos/` — arquivos `upload.png`, `upload-erro.png`, `dashboard.png`, `dashboard-celular.png`, `menu-celular.png` |
 
 ---
 
