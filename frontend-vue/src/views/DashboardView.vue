@@ -59,11 +59,12 @@ onMounted(carregar)
         </div>
         <button
           type="button"
+          :aria-busy="carregando"
           class="self-start rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-mist-200 transition hover:bg-white/5 hover:text-white sm:self-auto"
           :disabled="carregando"
           @click="carregar"
         >
-          Atualizar
+          {{ carregando ? 'Atualizando...' : 'Atualizar' }}
         </button>
       </div>
 
