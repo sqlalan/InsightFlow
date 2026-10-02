@@ -4,17 +4,25 @@ import { RouterLink } from 'vue-router'
 import PainelNav from '../components/layout/PainelNav.vue'
 import ListaInsights from '../components/dashboard/ListaInsights.vue'
 import { buscarInsights, buscarTelemetria, listarClientes } from '../services/api'
+import {
+  clientesSimulados,
+  insightsSimulados,
+  qualidadeSimulada,
+  telemetriaSimulada,
+} from '../services/dadosSimulados'
 
 const insights = ref([])
 const eventos = ref([])
 const clientes = ref([])
 const carregando = ref(true)
 const erro = ref('')
+const simulado = ref(false)
 
 /** Uma única carga: usada na montagem e no botão de atualizar. */
 async function carregar() {
   carregando.value = true
   erro.value = ''
+  simulado.value = false
   try {
     const [dadosInsights, dadosEventos, dadosClientes] = await Promise.all([
       buscarInsights(),
@@ -25,7 +33,15 @@ async function carregar() {
     eventos.value = dadosEventos
     clientes.value = dadosClientes
   } catch (falha) {
-    erro.value = falha.message
+    // status 0 = servidor fora do ar: mostra os dados simulados em vez de tela vazia
+    if (falha.status === 0) {
+      insights.value = insightsSimulados
+      eventos.value = telemetriaSimulada
+      clientes.value = clientesSimulados
+      simulado.value = true
+    } else {
+      erro.value = falha.message
+    }
   } finally {
     carregando.value = false
   }
@@ -125,6 +141,17 @@ function exportarCsv() {
       </div>
 
       <div
+        v-if="simulado"
+        role="status"
+        class="mt-6 rounded-xl border border-signal-500/30 bg-signal-500/10 px-5 py-4"
+      >
+        <p class="text-sm font-medium text-signal-400">Exibindo dados simulados</p>
+        <p class="mt-1 text-xs text-mist-400">
+          A API não está no ar. Os números abaixo são fictícios, só para demonstrar a tela.
+        </p>
+      </div>
+
+      <div
         v-if="erro"
         role="alert"
         class="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4"
@@ -134,6 +161,35 @@ function exportarCsv() {
           Clique em Atualizar para tentar de novo.
         </p>
       </div>
+
+      <!-- Qualidade da última planilha. A API ainda não devolve esses totais,
+           então o bloco só aparece com os dados simulados. -->
+      <section
+        v-if="simulado"
+        class="mt-8 rounded-2xl border border-white/10 bg-ink-900/60 p-5 sm:p-6"
+      >
+        <h2 class="text-sm font-semibold text-white">Qualidade dos dados da última planilha</h2>
+        <p class="mt-0.5 text-xs text-mist-500">O que o tratamento encontrou antes de gerar a análise</p>
+
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl bg-white/5 p-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-mist-500">Registros lidos</p>
+            <p class="mt-1 text-2xl font-semibold tabular-nums text-white">{{ qualidadeSimulada.registros }}</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-mist-500">Campos vazios</p>
+            <p class="mt-1 text-2xl font-semibold tabular-nums text-signal-400">{{ qualidadeSimulada.camposVazios }}</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-mist-500">Duplicidades</p>
+            <p class="mt-1 text-2xl font-semibold tabular-nums text-red-300">{{ qualidadeSimulada.duplicidades }}</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-mist-500">Registros válidos</p>
+            <p class="mt-1 text-2xl font-semibold tabular-nums text-trust-400">{{ qualidadeSimulada.registrosValidos }}</p>
+          </div>
+        </div>
+      </section>
 
       <section class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-5">
