@@ -17,3 +17,7 @@ orientações de entrega.
 
 Os prints 4 e 7 foram feitos com dados simulados: sem a API no ar, Dashboard e
 Relatórios exibem valores fictícios e um aviso indicando isso.
+
+Os prints 8 e 9 mostram a saída completa dos comandos `npm run dev` e
+`./mvnw spring-boot:run -Dspring-boot.run.profiles=local`, executados em
+02/10/2026.
