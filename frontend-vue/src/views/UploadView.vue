@@ -26,7 +26,7 @@ const COLUNAS_ESPERADAS = [
     <PainelNav />
 
     <main class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
-      <h1 class="text-2xl font-semibold text-white sm:text-3xl">Enviar planilha</h1>
+      <h1 class="text-3xl font-semibold text-white sm:text-4xl">Enviar planilha</h1>
       <p class="mt-2 max-w-2xl text-sm text-mist-400">
         Envie a planilha de clientes para atualizar os indicadores e as análises da carteira.
       </p>
