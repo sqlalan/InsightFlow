@@ -67,10 +67,10 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
             </svg>
           </RouterLink>
           <a
-            href="#como-funciona"
+            href="#funcionalidades"
             class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-6 py-3.5 text-sm font-semibold text-mist-100 backdrop-blur transition hover:border-white/25 hover:bg-white/10"
           >
-            Ver como funciona
+            Ver funcionalidades
           </a>
         </div>
 
