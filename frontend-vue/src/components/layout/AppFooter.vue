@@ -78,9 +78,6 @@ const contatos = [
 
         <div class="flex items-center gap-6">
           <p class="text-xs text-mist-500">© {{ year }} InsightFlow</p>
-          <RouterLink to="/login" class="text-xs font-medium text-mist-300 hover:text-white">
-            Acessar plataforma
-          </RouterLink>
         </div>
       </div>
     </div>
