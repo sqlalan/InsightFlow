@@ -1,9 +1,18 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { sair } from '../../services/api'
 import BrandLogo from '../BrandLogo.vue'
 
 const route = useRoute()
+const router = useRouter()
+const saindo = ref(false)
+async function encerrarSessao() {
+  saindo.value = true
+  try { await sair() } catch { /* A sessao local ja foi removida. */ }
+  await router.push('/login')
+  saindo.value = false
+}
 const aberto = ref(false)
 
 const links = [
@@ -125,6 +134,10 @@ watch(() => route.path, () => (aberto.value = false))
     </nav>
 
     <div class="border-t border-white/10 p-3">
+      <button type="button" :disabled="saindo" @click="encerrarSessao"
+        class="w-full rounded-lg px-3 py-2.5 text-left text-sm text-mist-300 hover:bg-white/5">
+        {{ saindo ? 'Saindo...' : 'Sair da plataforma' }}
+      </button>
       <RouterLink
         to="/"
         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-mist-400 transition hover:bg-white/5 hover:text-white"

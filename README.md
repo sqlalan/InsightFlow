@@ -98,6 +98,8 @@ python analise.py --entrada exemplos/CTI_Insights_modelo_upload_aula.xlsx --said
 
 ```bash
 cd backend-java
+export AUTH_ADMIN_EMAIL="admin@exemplo.com"
+export AUTH_ADMIN_PASSWORD="<sua senha com pelo menos 8 caracteres>"
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local   # H2 em memória, sem precisar do Azure
 ```
 
@@ -217,7 +219,11 @@ fictícios — é o único `.xlsx` liberado no `.gitignore`.
 
 ## Pendências conhecidas
 
-- Autenticação: a tela de login valida no cliente e abre o painel; o endpoint
-  `POST /api/auth/login` ainda não existe. Sem isso, não deve receber dados
-  reais da empresa.
+- A autenticação usa uma conta administrativa definida por ambiente. As sessões
+  ficam em memória e são invalidadas ao reiniciar a API. Cadastro de múltiplos
+  usuários, recuperação de senha, SSO e autenticação em dois fatores ainda não
+  estão implementados.
 - Links de "Esqueci minha senha", SSO, termos e privacidade apontam para `#`.
+
+O roteiro completo para Windows, com exemplos de chamadas e explicação das
+camadas, está em [backend-java/EXECUCAO_E_ARQUITETURA.md](backend-java/EXECUCAO_E_ARQUITETURA.md).

@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
+import { entrar } from '../services/api'
 
 const form = reactive({
   email: '',
@@ -39,22 +40,19 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    // TODO: integrar com o endpoint de autenticação (POST /api/auth/login).
-    // Enquanto ele não existe, a validação é só no cliente e o painel é aberto
-    // direto — o Projeto Integrador não prevê autenticação nesta entrega.
-    await new Promise((resolve) => setTimeout(resolve, 600))
+    await entrar(form.email, form.password, form.remember)
     await router.push('/upload')
-  } catch {
-    notice.value = { type: 'error', text: 'Não foi possível entrar. Tente novamente em instantes.' }
+  } catch (erro) {
+    notice.value = { type: 'error', text: erro.message }
   } finally {
     loading.value = false
   }
 }
 
 const highlights = [
-  'Autenticação em dois fatores disponível para toda a organização',
-  'Sessões monitoradas com registro de dispositivo e localização',
-  'Cada acesso aos seus arquivos fica na trilha de auditoria',
+  'Acesso com as credenciais fornecidas pelo administrador',
+  'Sessões com prazo de validade e opção de encerrar o acesso',
+  'Histórico de processamento das planilhas no painel de relatórios',
 ]
 </script>
 
@@ -81,10 +79,10 @@ const highlights = [
 
       <div class="relative max-w-md">
         <h2 class="text-3xl font-semibold leading-tight tracking-tight text-white">
-          O acesso aos seus dados de operação é
+          Acesse seus dados de operação com
           <span
             class="bg-linear-to-r from-flow-300 via-flow-400 to-signal-400 bg-clip-text text-transparent"
-            >controlado, registrado e reversível</span
+            >indicadores, gráficos e relatórios</span
           >.
         </h2>
         <p class="mt-6 text-sm leading-relaxed text-mist-400">
@@ -109,7 +107,7 @@ const highlights = [
           <rect x="4.5" y="10" width="15" height="10" rx="2" />
           <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" stroke-linecap="round" />
         </svg>
-        Conexão protegida por TLS 1.3 · dados criptografados em AES-256
+        InsightFlow · análise da carteira de clientes
       </div>
     </aside>
 

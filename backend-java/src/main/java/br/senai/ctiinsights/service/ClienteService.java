@@ -40,7 +40,7 @@ public class ClienteService {
 
     @Transactional
     public ClienteResponse criar(ClienteRequest requisicao) {
-        if (clientes.existsByCodigoCti(requisicao.codigoCti())) {
+        if (clientes.existsByCodigoCti(requisicao.codigoCti().trim())) {
             throw new ClienteDuplicadoException(requisicao.codigoCti());
         }
         Cliente cliente = new Cliente(
@@ -56,7 +56,7 @@ public class ClienteService {
     @Transactional
     public ClienteResponse atualizar(Long id, ClienteRequest requisicao) {
         Cliente cliente = buscarEntidade(id);
-        clientes.findByCodigoCti(requisicao.codigoCti())
+        clientes.findByCodigoCti(requisicao.codigoCti().trim())
                 .filter(outro -> !outro.getId().equals(id))
                 .ifPresent(outro -> {
                     throw new ClienteDuplicadoException(requisicao.codigoCti());

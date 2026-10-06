@@ -4,10 +4,7 @@ import br.senai.ctiinsights.config.AnalyticsProperties;
 import br.senai.ctiinsights.exception.AnaliseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,23 +40,20 @@ public class AnaliseService {
     /** Roda o pipeline Python sobre a planilha e devolve o JSON de clientes tratados. */
     public ResultadoAnalise executar(Path planilha) {
         Path script = Path.of(propriedades.getPython().getScript()).toAbsolutePath().normalize();
-        Path saida = Path.of(propriedades.getPython().getOutput()).toAbsolutePath().normalize();
+        Path raizSaida = Path.of(propriedades.getPython().getOutput()).toAbsolutePath().normalize();
 
         if (!Files.exists(script)) {
             throw new AnaliseException("Script de analise nao encontrado em " + script);
         }
 
         long inicio = System.currentTimeMillis();
-        StringBuilder log0 = new StringBuilder();
+        Path saida = null;
+        Process processo = null;
         try {
-            Process processo = iniciar(script, planilha, saida);
-            try (BufferedReader leitor = new BufferedReader(
-                    new InputStreamReader(processo.getInputStream(), StandardCharsets.UTF_8))) {
-                String linha;
-                while ((linha = leitor.readLine()) != null) {
-                    log0.append(linha).append(System.lineSeparator());
-                }
-            }
+            Files.createDirectories(raizSaida);
+            saida = Files.createTempDirectory(raizSaida, "execucao-");
+            Path arquivoLog = saida.resolve("processo.log");
+            processo = iniciar(script, planilha, saida, arquivoLog);
             boolean terminou = processo.waitFor(propriedades.getTimeoutSeconds(), TimeUnit.SECONDS);
             if (!terminou) {
                 processo.destroyForcibly();
@@ -67,21 +61,26 @@ public class AnaliseService {
                         + propriedades.getTimeoutSeconds() + " segundos e foi interrompido.");
             }
             if (processo.exitValue() != 0) {
-                log.error("Modulo Python falhou (exit {}):{}{}", processo.exitValue(), System.lineSeparator(), log0);
+                log.error("Modulo Python falhou (exit {}), consulte {}", processo.exitValue(), arquivoLog);
                 throw new AnaliseException("O script de tratamento terminou com erro.");
             }
+            long duracao = System.currentTimeMillis() - inicio;
+            JsonNode clientes = lerJson(saida.resolve("clientes.json"));
+            JsonNode insights = lerJson(saida.resolve("insights.json"));
+            JsonNode indicadores = lerJson(saida.resolve("indicadores.json"));
+            return new ResultadoAnalise(clientes, insights, indicadores, duracao,
+                    Files.readString(arquivoLog, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new AnaliseException("Falha ao executar o script de tratamento.", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new AnaliseException("O tratamento foi interrompido.", e);
+        } finally {
+            if (processo != null && processo.isAlive()) {
+                processo.descendants().forEach(ProcessHandle::destroyForcibly);
+                processo.destroyForcibly();
+            }
         }
-
-        long duracao = System.currentTimeMillis() - inicio;
-        JsonNode clientes = lerJson(saida.resolve("clientes.json"));
-        JsonNode insights = lerJson(saida.resolve("insights.json"));
-        JsonNode indicadores = lerJson(saida.resolve("indicadores.json"));
-        return new ResultadoAnalise(clientes, insights, indicadores, duracao, log0.toString());
     }
 
     /**
@@ -127,21 +126,22 @@ public class AnaliseService {
     }
 
     private boolean responde(String comando) {
+        Process teste = null;
         try {
-            Process teste = new ProcessBuilder(comando, "--version").redirectErrorStream(true).start();
-            try (InputStream saida = teste.getInputStream()) {
-                saida.readAllBytes(); // esvazia o buffer para o processo nao travar
-            }
+            teste = new ProcessBuilder(comando, "--version").redirectErrorStream(true)
+                    .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
             return teste.waitFor(10, TimeUnit.SECONDS) && teste.exitValue() == 0;
         } catch (IOException e) {
             return false; // comando nao existe no PATH
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return false;
+        } finally {
+            if (teste != null && teste.isAlive()) teste.destroyForcibly();
         }
     }
 
-    private Process iniciar(Path script, Path planilha, Path saida) throws IOException {
+    private Process iniciar(Path script, Path planilha, Path saida, Path arquivoLog) throws IOException {
         ProcessBuilder builder = new ProcessBuilder(
                 interpretador(),
                 script.toString(),
@@ -149,6 +149,8 @@ public class AnaliseService {
                 "--saida", saida.toString());
         builder.directory(script.getParent().toFile());
         builder.redirectErrorStream(true);
+        builder.redirectOutput(arquivoLog.toFile());
+        builder.environment().put("PYTHONIOENCODING", "utf-8");
         return builder.start();
     }
 
