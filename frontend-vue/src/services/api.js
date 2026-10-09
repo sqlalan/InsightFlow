@@ -27,12 +27,14 @@ const MENSAGENS_POR_STATUS = {
  * a lista `detalhes` (ex.: quais colunas faltaram na planilha).
  */
 export class ErroDaApi extends Error {
-  constructor(mensagem, { status = 0, codigo = null, detalhes = [] } = {}) {
+  constructor(mensagem, { status = 0, codigo = null, detalhes = [], indice = null } = {}) {
     super(mensagem)
     this.name = 'ErroDaApi'
     this.status = status
     this.codigo = codigo
     this.detalhes = detalhes
+    // Posição na lista enviada para /api/clientes/validar que o Java recusou.
+    this.indice = indice
   }
 }
 
@@ -47,15 +49,26 @@ api.interceptors.response.use(
 
     const status = erro.response?.status ?? 0
     const corpo = erro.response?.data
+    // Dois formatos de erro: o padrão da API traz a lista em `detalhes`; o da
+    // validação da aula 10 ({ mensagem, campo, erro }) traz o problema em `erro`.
+    const detalhes = corpo?.detalhes ?? (corpo?.erro ? [corpo.erro] : [])
 
     return Promise.reject(
       new ErroDaApi(
         corpo?.mensagem ?? MENSAGENS_POR_STATUS[status] ?? 'Não foi possível concluir a operação.',
-        { status, codigo: corpo?.erro ?? null, detalhes: corpo?.detalhes ?? [] },
+        { status, codigo: corpo?.erro ?? null, detalhes, indice: corpo?.indice ?? null },
       ),
     )
   },
 )
+
+/**
+ * Manda as linhas válidas em JSON para o Spring Boot validar de novo (DTO +
+ * Service). Devolve a mesma lista já padronizada pelo Java; nada é gravado.
+ */
+export function validarClientes(clientes) {
+  return api.post('/api/clientes/validar', clientes).then((resposta) => resposta.data)
+}
 
 /** Envia a planilha Excel e devolve o resumo do processamento. */
 export function enviarPlanilha(arquivo, aoProgredir) {
