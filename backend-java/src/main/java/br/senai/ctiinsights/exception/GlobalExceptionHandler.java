@@ -1,13 +1,17 @@
 package br.senai.ctiinsights.exception;
 
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
@@ -72,6 +76,33 @@ public class GlobalExceptionHandler {
                 "DADOS_INVALIDOS",
                 "Revise os campos enviados.",
                 detalhes));
+    }
+
+    /**
+     * Erro de DTO dentro de uma lista (POST /api/clientes/validar).
+     *
+     * A apostila trata so MethodArgumentNotValidException, mas com
+     * List<@Valid ClienteDTO> o Spring Boot 3 lanca HandlerMethodValidationException.
+     * Sem este metodo a resposta seria 400 com corpo vazio. "indice" diz qual
+     * item da lista falhou (comeca em 0), para o Front apontar a linha.
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<Map<String, String>> validacaoDaLista(HandlerMethodValidationException ex) {
+        ParameterErrors item = ex.getBeanResults().get(0);
+        FieldError erro = item.getFieldErrors().get(0);
+        return ResponseEntity.badRequest().body(Map.of(
+                "mensagem", "Dados inválidos",
+                "campo", erro.getField(),
+                "erro", erro.getDefaultMessage(),
+                "indice", String.valueOf(item.getContainerIndex())));
+    }
+
+    /** Regra de lote quebrada no ClienteValidacaoService, como codigo repetido. */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> regraDeNegocio(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "mensagem", "Regra de validação não atendida",
+                "erro", ex.getMessage()));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
