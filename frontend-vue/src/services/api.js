@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getSession, saveSession, clearSession } from './session'
 
 /**
  * Cliente HTTP único do projeto.
@@ -12,6 +13,26 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
   timeout: 180_000, // o tratamento em Python pode demorar em planilhas grandes
 })
+
+api.interceptors.request.use((config) => {
+  const session = getSession()
+  if (session) config.headers.Authorization = `Bearer ${session.token}`
+  return config
+})
+
+export async function entrar(email, password, remember) {
+  const { data } = await api.post('/api/auth/login', { email, password, remember })
+  saveSession(data, remember)
+  return data
+}
+
+export async function sair() {
+  try {
+    await api.post('/api/auth/logout')
+  } finally {
+    clearSession()
+  }
+}
 
 /** Mensagens para os casos em que a resposta não traz corpo de erro. */
 const MENSAGENS_POR_STATUS = {
@@ -46,6 +67,10 @@ api.interceptors.response.use(
     }
 
     const status = erro.response?.status ?? 0
+    if (status === 401 && !erro.config?.url?.endsWith('/auth/login')) {
+      clearSession()
+      if (window.location.pathname !== '/login') window.location.assign('/login')
+    }
     const corpo = erro.response?.data
 
     return Promise.reject(

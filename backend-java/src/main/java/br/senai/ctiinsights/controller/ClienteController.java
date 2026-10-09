@@ -2,11 +2,11 @@ package br.senai.ctiinsights.controller;
 
 import br.senai.ctiinsights.dto.ClienteRequest;
 import br.senai.ctiinsights.dto.ClienteResponse;
+import br.senai.ctiinsights.dto.NivelRequest;
 import br.senai.ctiinsights.service.ClienteService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,8 +58,8 @@ public class ClienteController {
     }
 
     @PatchMapping("/{id}/nivel")
-    public ClienteResponse reclassificar(@PathVariable Long id, @RequestBody Map<String, String> corpo) {
-        return servico.atualizarNivel(id, corpo.get("nivel"));
+    public ClienteResponse reclassificar(@PathVariable Long id, @Valid @RequestBody NivelRequest corpo) {
+        return servico.atualizarNivel(id, corpo.nivel());
     }
 
     @DeleteMapping("/{id}")

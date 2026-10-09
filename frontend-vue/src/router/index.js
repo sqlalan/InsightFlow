@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { getSession } from '../services/session'
 
 const routes = [
   {
@@ -52,6 +53,12 @@ const router = createRouter({
 
 router.afterEach((to) => {
   document.title = to.meta?.title ?? 'InsightFlow'
+})
+
+router.beforeEach((to) => {
+  if (['upload', 'dashboard', 'relatorios'].includes(to.name) && !getSession()) {
+    return { name: 'login' }
+  }
 })
 
 export default router
