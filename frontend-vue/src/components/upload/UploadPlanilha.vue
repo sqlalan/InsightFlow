@@ -67,11 +67,11 @@ function remover() {
       <span class="text-sm font-medium text-mist-200">
         Arraste a planilha aqui ou <span class="text-flow-300 underline">escolha um arquivo</span>
       </span>
-      <span class="text-xs text-mist-500">.xlsx ou .xls — até 10 MB</span>
+      <span class="text-xs text-mist-500">.xlsx, .xls ou .csv — até 10 MB</span>
       <input
         ref="campo"
         type="file"
-        accept=".xlsx,.xls"
+        accept=".xlsx,.xls,.csv"
         class="sr-only"
         @change="selecionar($event.target.files?.[0])"
       />
@@ -85,7 +85,7 @@ function remover() {
         <p class="truncate text-sm font-medium text-mist-100">{{ upload.arquivo.name }}</p>
         <p class="text-xs text-mist-500">
           {{ tamanhoLegivel }}
-          <span v-if="upload.temDados"> · {{ upload.totalClientes }} linhas lidas</span>
+          <span v-if="upload.temDados"> · {{ upload.quantidadeLinhas }} linhas lidas</span>
         </p>
       </div>
       <button
@@ -110,30 +110,39 @@ function remover() {
       </ul>
     </div>
 
-    <!-- Amarelo: dá para enviar; o tratamento corrige o que está listado. -->
+    <!-- Amarelo: as linhas listadas ficam de fora; as demais podem ser enviadas. -->
     <div
-      v-if="upload.totalAvisos > 0"
+      v-if="upload.quantidadeInvalidas > 0"
       role="status"
       class="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
     >
       <p class="text-sm font-medium text-amber-200">
-        {{ upload.totalAvisos }} aviso(s) na planilha
+        {{ upload.quantidadeInvalidas }}
+        {{ upload.quantidadeInvalidas > 1 ? 'linhas com problema ficam' : 'linha com problema fica' }}
+        de fora do envio
       </p>
-      <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-100/80">
-        <li v-for="(aviso, indice) in upload.avisos" :key="indice">{{ aviso }}</li>
+      <ul class="mt-2 max-h-48 list-disc space-y-1 overflow-y-auto pl-5 text-xs text-amber-100/80">
+        <li v-for="cliente in upload.dadosInvalidos" :key="cliente.linha">
+          Linha {{ cliente.linha }}<template v-if="cliente.codigo"> ({{ cliente.codigo }})</template>:
+          {{ cliente.problemas.join('; ') }}
+        </li>
       </ul>
       <p class="mt-2 text-xs text-amber-100/60">
-        Os avisos não impedem o envio. Para corrigir, ajuste essas linhas na planilha e envie de novo.
+        Para incluí-las, corrija essas linhas na planilha e selecione o arquivo de novo.
       </p>
     </div>
 
     <button
       type="button"
       class="mt-6 w-full rounded-lg bg-flow-500 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:bg-flow-400 disabled:cursor-not-allowed disabled:opacity-40"
-      :disabled="!upload.temDados || upload.enviando"
+      :disabled="upload.quantidadeValidas === 0 || upload.enviando"
       @click="confirmando = true"
     >
-      Enviar e analisar
+      <template v-if="upload.temDados">
+        Enviar {{ upload.quantidadeValidas }}
+        {{ upload.quantidadeValidas === 1 ? 'linha válida' : 'linhas válidas' }}
+      </template>
+      <template v-else>Enviar e analisar</template>
     </button>
 
     <ModalEnvio v-model="confirmando" />

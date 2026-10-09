@@ -103,9 +103,18 @@ function formatarDuracao(ms) {
 
       <dl class="mt-5 grid grid-cols-3 gap-3">
         <div class="rounded-lg border border-white/10 bg-ink-950/60 p-3">
-          <dt class="text-xs text-mist-500">Linhas</dt>
+          <dt class="text-xs text-mist-500">Válidas</dt>
           <dd class="mt-1 text-xl font-semibold tabular-nums text-white">
-            {{ upload.totalClientes }}
+            {{ upload.quantidadeValidas }}
+          </dd>
+        </div>
+        <div class="rounded-lg border border-white/10 bg-ink-950/60 p-3">
+          <dt class="text-xs text-mist-500">Fora do envio</dt>
+          <dd
+            class="mt-1 text-xl font-semibold tabular-nums"
+            :class="upload.quantidadeInvalidas ? 'text-amber-300' : 'text-white'"
+          >
+            {{ upload.quantidadeInvalidas }}
           </dd>
         </div>
         <div class="rounded-lg border border-white/10 bg-ink-950/60 p-3">
@@ -114,19 +123,13 @@ function formatarDuracao(ms) {
             {{ upload.clientesNivelA }}
           </dd>
         </div>
-        <div class="rounded-lg border border-white/10 bg-ink-950/60 p-3">
-          <dt class="text-xs text-mist-500">Avisos</dt>
-          <dd
-            class="mt-1 text-xl font-semibold tabular-nums"
-            :class="upload.totalAvisos ? 'text-amber-300' : 'text-white'"
-          >
-            {{ upload.totalAvisos }}
-          </dd>
-        </div>
       </dl>
 
-      <p v-if="upload.totalAvisos" class="mt-4 text-xs leading-relaxed text-mist-400">
-        Os avisos não impedem o envio. Ao final, o resumo mostra o que ficou de fora.
+      <p class="mt-4 text-xs leading-relaxed text-mist-400">
+        As linhas válidas passam por uma nova validação no servidor antes da análise.
+        <template v-if="upload.quantidadeInvalidas">
+          As que têm problema não são enviadas.
+        </template>
       </p>
 
       <div class="mt-6 flex justify-end gap-3">
@@ -155,7 +158,10 @@ function formatarDuracao(ms) {
           aria-hidden="true"
         />
         <h2 id="titulo-envio" class="text-lg font-semibold text-white">
-          {{ upload.progresso < 100 ? 'Enviando a planilha' : 'Analisando os dados' }}
+          <template v-if="upload.validando">Validando os dados</template>
+          <template v-else>
+            {{ upload.progresso < 100 ? 'Enviando a planilha' : 'Analisando os dados' }}
+          </template>
         </h2>
       </div>
 
@@ -168,7 +174,10 @@ function formatarDuracao(ms) {
       </div>
 
       <p class="mt-4 text-sm text-mist-400">
-        <template v-if="upload.progresso < 100">
+        <template v-if="upload.validando">
+          O servidor está conferindo as linhas antes da análise.
+        </template>
+        <template v-else-if="upload.progresso < 100">
           Enviando o arquivo… {{ upload.progresso }}%
         </template>
         <template v-else>

@@ -7,15 +7,16 @@ const upload = useUploadStore()
 
 // Cabeçalhos do modelo oficial da aula, na ordem da planilha.
 // `rotulo` é o que aparece na tela; `nome` é o cabeçalho real, mostrado ao passar o mouse.
+// Obrigatórias = as mesmas do ClienteDTO no Java.
 const COLUNAS_ESPERADAS = [
   { nome: 'codigo_cliente', rotulo: 'Código do cliente', obrigatoria: true },
-  { nome: 'nome_cliente', rotulo: 'Nome do cliente', obrigatoria: false },
+  { nome: 'nome_cliente', rotulo: 'Nome do cliente', obrigatoria: true },
   { nome: 'consultor', rotulo: 'Consultor', obrigatoria: true },
   { nome: 'segmento', rotulo: 'Segmento', obrigatoria: true },
   { nome: 'nivel_cliente', rotulo: 'Nível do cliente', obrigatoria: true },
   { nome: 'faturamento_anual', rotulo: 'Faturamento anual', obrigatoria: true },
   { nome: 'servicos_contratados', rotulo: 'Serviços contratados', obrigatoria: true },
-  { nome: 'data_contratacao', rotulo: 'Data de contratação', obrigatoria: false },
+  { nome: 'data_contratacao', rotulo: 'Data de contratação', obrigatoria: true },
   { nome: 'cidade', rotulo: 'Cidade', obrigatoria: false },
   { nome: 'uf', rotulo: 'UF', obrigatoria: false },
 ]
@@ -72,7 +73,23 @@ const COLUNAS_ESPERADAS = [
             <div>
               <dt class="text-xs text-mist-500">Linhas</dt>
               <dd class="text-lg font-semibold tabular-nums text-white">
-                {{ upload.totalClientes }}
+                {{ upload.quantidadeLinhas }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-mist-500">Válidas</dt>
+              <dd class="text-lg font-semibold tabular-nums text-white">
+                {{ upload.quantidadeValidas }}
+                <span class="text-xs font-normal text-mist-500">({{ upload.percentualValidos }}%)</span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-mist-500">Com problema</dt>
+              <dd
+                class="text-lg font-semibold tabular-nums"
+                :class="upload.quantidadeInvalidas ? 'text-amber-300' : 'text-white'"
+              >
+                {{ upload.quantidadeInvalidas }}
               </dd>
             </div>
             <div>
@@ -109,27 +126,38 @@ const COLUNAS_ESPERADAS = [
                 <th class="py-2 pr-4 font-medium">Código</th>
                 <th class="py-2 pr-4 font-medium">Consultor</th>
                 <th class="py-2 pr-4 font-medium">Segmento</th>
-                <th class="py-2 font-medium">Nível</th>
+                <th class="py-2 pr-4 font-medium">Nível</th>
+                <th class="py-2 font-medium">Situação</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="(cliente, indice) in upload.previa"
-                :key="cliente.codigo || indice"
+                v-for="cliente in upload.previa"
+                :key="cliente.linha"
                 class="border-b border-white/5 text-mist-300"
               >
                 <td class="py-2 pr-4 font-medium text-mist-100">{{ cliente.codigo || '—' }}</td>
                 <td class="py-2 pr-4">{{ cliente.consultor || '—' }}</td>
                 <td class="py-2 pr-4">{{ cliente.segmento || '—' }}</td>
-                <td class="py-2">{{ cliente.nivel || '—' }}</td>
+                <td class="py-2 pr-4">{{ cliente.nivel || '—' }}</td>
+                <td class="py-2">
+                  <span
+                    v-if="cliente.problemas.length"
+                    class="text-amber-300"
+                    :title="cliente.problemas.join('; ')"
+                  >
+                    Fora do envio
+                  </span>
+                  <span v-else class="text-trust-300">Válida</span>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <p v-if="upload.totalClientes > upload.previa.length" class="mt-3 text-xs text-mist-500">
+        <p v-if="upload.quantidadeLinhas > upload.previa.length" class="mt-3 text-xs text-mist-500">
           Mostrando as {{ upload.previa.length }} primeiras de
-          {{ upload.totalClientes }} linhas.
+          {{ upload.quantidadeLinhas }} linhas.
         </p>
       </section>
     </main>

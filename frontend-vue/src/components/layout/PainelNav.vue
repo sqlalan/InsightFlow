@@ -1,19 +1,22 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { sair } from '../../services/api'
+import { useAuthStore } from '../../stores/authStore'
 import BrandLogo from '../BrandLogo.vue'
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 const saindo = ref(false)
-async function encerrarSessao() {
+const aberto = ref(false)
+
+/** Encerra a sessão no servidor e no navegador e volta para o login. */
+async function sair() {
   saindo.value = true
-  try { await sair() } catch { /* A sessao local ja foi removida. */ }
+  await auth.logout()
   await router.push('/login')
   saindo.value = false
 }
-const aberto = ref(false)
 
 const links = [
   { to: '/upload', label: 'Enviar planilha', icone: 'upload' },
@@ -134,13 +137,14 @@ watch(() => route.path, () => (aberto.value = false))
     </nav>
 
     <div class="border-t border-white/10 p-3">
-      <button type="button" :disabled="saindo" @click="encerrarSessao"
-        class="w-full rounded-lg px-3 py-2.5 text-left text-sm text-mist-300 hover:bg-white/5">
-        {{ saindo ? 'Saindo...' : 'Sair da plataforma' }}
-      </button>
-      <RouterLink
-        to="/"
-        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-mist-400 transition hover:bg-white/5 hover:text-white"
+      <p class="truncate px-3 pb-2 text-xs text-mist-500" :title="auth.nomeExibicao">
+        {{ auth.nomeExibicao }}
+      </p>
+      <button
+        type="button"
+        :disabled="saindo"
+        class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-mist-400 transition hover:bg-white/5 hover:text-white disabled:opacity-60"
+        @click="sair"
       >
         <svg
           viewBox="0 0 24 24"
@@ -152,8 +156,8 @@ watch(() => route.path, () => (aberto.value = false))
         >
           <path d="M19 12H5m0 0 5-5m-5 5 5 5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Sair
-      </RouterLink>
+        {{ saindo ? 'Saindo…' : 'Sair' }}
+      </button>
     </div>
   </aside>
 </template>
