@@ -8,14 +8,20 @@ import br.senai.ctiinsights.exception.GlobalExceptionHandler;
 import br.senai.ctiinsights.service.ClienteValidacaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-/** Os mesmos testes que a aula 10 faz no Thunder Client, automatizados. */
+/**
+ * Os mesmos testes que a aula 10 faz no Thunder Client, automatizados.
+ * addFilters = false desliga o login (Spring Security): aqui o assunto e a
+ * validacao; o login tem os testes dele em ApiIntegrationTest.
+ */
 @WebMvcTest(ClienteValidacaoController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import({ClienteValidacaoService.class, GlobalExceptionHandler.class})
 class ClienteValidacaoControllerTest {
 

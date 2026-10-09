@@ -39,6 +39,7 @@ lerna-debug.log*
 # Back-end (Java / Maven)
 # ---------------------------------------------------------------------------
 target/
+.maven-cache/
 *.class
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
@@ -52,6 +53,7 @@ __pycache__/
 venv/
 .ipynb_checkpoints/
 analytics-python/output/*.json
+analytics-python/output/execucao-*/
 analytics-python/output/graficos/*.png
 
 # ---------------------------------------------------------------------------

@@ -10,6 +10,8 @@ o wrapper (`mvnw`) baixa a versão correta na primeira execução.
 
 ```bash
 # banco em memória (não precisa do Azure)
+export AUTH_ADMIN_EMAIL="admin@exemplo.com"
+export AUTH_ADMIN_PASSWORD="<sua senha com pelo menos 8 caracteres>"
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # apontando para o PostgreSQL no Azure
@@ -46,11 +48,17 @@ interpretador específico (um virtualenv, por exemplo), use `PYTHON_BIN`.
 | `ANALYTICS_DIR` | `../analytics-python` | pasta do módulo de Ciência de Dados |
 | `UPLOAD_DIR` | `uploads` | onde as planilhas recebidas são gravadas |
 | `PORT` | `8080` | porta HTTP (o Render define automaticamente) |
+| `AUTH_ADMIN_EMAIL` | vazio | e-mail da conta administrativa; vazio bloqueia o login |
+| `AUTH_ADMIN_PASSWORD` | vazio | senha administrativa de pelo menos 8 caracteres |
 
 ## Endpoints
 
 | Método | Rota | Resposta |
 | ------ | ---- | -------- |
+| `GET` | `/api/health` | 200 — verificação pública de disponibilidade HTTP |
+| `POST` | `/api/auth/login` | 200 — token, e-mail e validade / 401 |
+| `GET` | `/api/auth/me` | 200 — e-mail da sessão / 401 |
+| `POST` | `/api/auth/logout` | 204 — revoga o token / 401 |
 | `POST` | `/api/planilhas` | 200 — resumo do processamento e primeiros insights |
 | `GET` | `/api/clientes?segmento=` | 200 — lista da carteira |
 | `GET` | `/api/clientes/{id}` | 200 / 404 |
@@ -63,6 +71,16 @@ interpretador específico (um virtualenv, por exemplo), use `PYTHON_BIN`.
 | `GET` | `/api/telemetria` | 200 — últimos 20 eventos de processamento |
 
 ## Exceções tratadas
+
+Exceto saúde e login, todas as rotas exigem `Authorization: Bearer <token>`.
+O login recebe `{ "email": "...", "password": "...", "remember": false }`.
+Sessões duram 8 horas ou 7 dias com `remember: true`, e desaparecem ao reiniciar
+a API. O navegador usa sessionStorage ou localStorage conforme essa opção.
+Esta implementação atende uma instância e uma conta administrativa; não inclui
+gestão de usuários, SSO ou recuperação de senha. Use HTTPS na publicação.
+
+Veja [EXECUCAO_E_ARQUITETURA.md](EXECUCAO_E_ARQUITETURA.md) para os comandos em
+PowerShell, exemplos de CRUD e explicação passo a passo.
 
 Todas passam pelo `GlobalExceptionHandler` e chegam ao Front-end com mensagem
 legível, nunca como stack trace:
