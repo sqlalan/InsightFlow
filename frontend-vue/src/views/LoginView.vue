@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import BrandLogo from '../components/BrandLogo.vue'
-import { entrar } from '../services/api'
+import { useAuthStore } from '../stores/authStore'
 
 const form = reactive({
   email: '',
@@ -11,6 +11,7 @@ const form = reactive({
 })
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const touched = reactive({ email: false, password: false })
 const showPassword = ref(false)
@@ -40,7 +41,7 @@ async function handleSubmit() {
 
   loading.value = true
   try {
-    await entrar(form.email, form.password, form.remember)
+    await auth.login(form.email, form.password, form.remember)
     await router.push('/upload')
   } catch (erro) {
     notice.value = { type: 'error', text: erro.message }
