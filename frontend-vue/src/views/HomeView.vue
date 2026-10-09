@@ -2,7 +2,7 @@
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppFooter from '../components/layout/AppFooter.vue'
 import HeroSection from '../components/home/HeroSection.vue'
-import HowItWorks from '../components/home/HowItWorks.vue'
+import FuncionalidadesSection from '../components/home/FuncionalidadesSection.vue'
 </script>
 
 <template>
@@ -10,7 +10,7 @@ import HowItWorks from '../components/home/HowItWorks.vue'
     <AppHeader />
     <main>
       <HeroSection />
-      <HowItWorks />
+      <FuncionalidadesSection />
     </main>
     <AppFooter />
   </div>

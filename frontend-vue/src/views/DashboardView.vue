@@ -10,12 +10,18 @@ import GraficoSegmento from '../components/dashboard/GraficoSegmento.vue'
 import ListaInsights from '../components/dashboard/ListaInsights.vue'
 import TabelaClientes from '../components/dashboard/TabelaClientes.vue'
 import { buscarIndicadores, buscarInsights, listarClientes } from '../services/api'
+import {
+  clientesSimulados,
+  indicadoresSimulados,
+  insightsSimulados,
+} from '../services/dadosSimulados'
 
 const indicadores = ref(null)
 const insights = ref([])
 const clientes = ref([])
 const carregando = ref(true)
 const erro = ref('')
+const simulado = ref(false)
 
 const ticketMedio = computed(() => {
   const total = indicadores.value?.totalContratos ?? 0
@@ -26,6 +32,7 @@ const ticketMedio = computed(() => {
 async function carregar() {
   carregando.value = true
   erro.value = ''
+  simulado.value = false
   try {
     const [dadosIndicadores, dadosInsights, dadosClientes] = await Promise.all([
       buscarIndicadores(),
@@ -36,7 +43,15 @@ async function carregar() {
     insights.value = dadosInsights
     clientes.value = dadosClientes
   } catch (falha) {
-    erro.value = falha.message
+    // status 0 = servidor fora do ar: mostra os dados simulados em vez de tela vazia
+    if (falha.status === 0) {
+      indicadores.value = indicadoresSimulados
+      insights.value = insightsSimulados
+      clientes.value = clientesSimulados
+      simulado.value = true
+    } else {
+      erro.value = falha.message
+    }
   } finally {
     carregando.value = false
   }
@@ -66,6 +81,17 @@ onMounted(carregar)
         >
           {{ carregando ? 'Atualizando...' : 'Atualizar' }}
         </button>
+      </div>
+
+      <div
+        v-if="simulado"
+        role="status"
+        class="mt-6 rounded-xl border border-signal-500/30 bg-signal-500/10 px-5 py-4"
+      >
+        <p class="text-sm font-medium text-signal-400">Exibindo dados simulados</p>
+        <p class="mt-1 text-xs text-mist-400">
+          A API não está no ar. Os números abaixo são fictícios, só para demonstrar a tela.
+        </p>
       </div>
 
       <div

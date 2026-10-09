@@ -293,7 +293,7 @@ const highlights = [
           </a>
         </p>
 
-        <p class="mt-10 text-center text-[11px] leading-relaxed text-mist-500">
+        <p class="mt-10 text-center text-xs leading-relaxed text-mist-500">
           Ao continuar, você concorda com os
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Termos de uso</a> e a
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Política de privacidade</a>

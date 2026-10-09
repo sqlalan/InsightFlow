@@ -152,7 +152,7 @@ watch(() => route.path, () => (aberto.value = false))
         >
           <path d="M19 12H5m0 0 5-5m-5 5 5 5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Voltar ao site
+        Sair
       </RouterLink>
     </div>
   </aside>

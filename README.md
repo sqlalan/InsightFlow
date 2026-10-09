@@ -8,6 +8,94 @@ Empresa parceira: **Provedor CTI — Cti Comunicação de Dados e Tecnologia LTD
 
 ---
 
+## Entrega da Sprint 2
+
+**Versão avaliada:** tag [`sprint-2`](https://github.com/sqlalan/InsightFlow/tree/sprint-2).
+
+### Objetivo
+
+Front-End em Vue 3 navegável, com as telas Home pública, Login, Dashboard,
+Upload e Relatórios, e um projeto Spring Boot criado e iniciando sem erros.
+
+Fluxo: **Home pública → Login → área interna (Dashboard / Upload / Relatórios)**.
+
+### Tecnologias e versões
+
+| Camada | Tecnologia | Versão |
+| ------ | ---------- | ------ |
+| Front-End | Vue | 3.5 |
+| | Vue Router | 4.6 |
+| | Vite | 8.2 |
+| | Pinia | 4.0 |
+| | Chart.js | 4.5 |
+| | Tailwind CSS | 4.3 |
+| | Node.js / npm | 20.19+ (testado com 25.7 / 11.12) |
+| Back-End | Java (JDK) | 21+ |
+| | Spring Boot | 3.4.2 |
+| | Maven | via wrapper `mvnw` (não precisa instalar) |
+| Dados | Python + Pandas | 3 (bibliotecas em `analytics-python/requirements.txt`) |
+
+### Executar o Front-End
+
+```bash
+cd frontend-vue
+npm install      # instala as dependências
+npm run dev      # abre em http://localhost:5173
+```
+
+Não é preciso subir o Back-End para navegar: sem a API no ar, Dashboard e
+Relatórios mostram **dados simulados** e um aviso indicando isso.
+
+### Iniciar o Spring Boot
+
+```bash
+cd backend-java
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local     # Linux/macOS/Git Bash
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local   # Windows (cmd/PowerShell)
+```
+
+> **Use o perfil `local`.** Ele sobe com banco H2 em memória. Sem o perfil, a
+> aplicação tenta conectar no PostgreSQL de produção, cujas credenciais não
+> ficam no repositório. A aplicação está pronta quando o log mostrar
+> `Started CtiInsightsApplication`.
+
+### Telas entregues
+
+| Rota | Tela | O que tem |
+| ---- | ---- | --------- |
+| `/` | Home pública | Apresentação do CTI Insights, funcionalidades (Upload, Dashboard, Relatórios) e botão que leva ao Login. Sem sidebar. |
+| `/login` | Login | E-mail, senha e botão "Entrar". Validação só no navegador; autenticação real fica para as próximas sprints. |
+| `/dashboard` | Dashboard | Cards de indicadores, 4 gráficos (segmento, nível, faixa de faturamento, evolução), tabela de clientes e insights. |
+| `/upload` | Upload | Seleção da planilha (.xlsx/.xls), nome do arquivo, status da leitura e prévia dos dados. |
+| `/relatorios` | Relatórios | Qualidade dos dados (registros, campos vazios, duplicidades), histórico de processamento, insights e exportação em CSV. |
+
+A sidebar (`PainelNav.vue`) fica em todas as telas da área interna.
+
+### Correspondência com a estrutura sugerida
+
+O repositório já estava publicado (Vercel + Render) com os nomes abaixo; renomear
+as pastas quebraria o deploy, então mantivemos os nomes e registramos a
+correspondência:
+
+| Sugerido nas orientações | Neste repositório |
+| ------------------------ | ----------------- |
+| `frontend/` | `frontend-vue/` |
+| `backend/` | `backend-java/` |
+| `python/` | `analytics-python/` |
+| `evidencias/` | `evidencias/` |
+| `components/Header.vue` | `components/layout/AppHeader.vue` |
+| `components/Sidebar.vue` | `components/layout/PainelNav.vue` |
+| `components/CardIndicador.vue` | `components/dashboard/CardIndicador.vue` |
+| `components/UploadArquivo.vue` | `components/upload/UploadPlanilha.vue` |
+
+O Back-End já tem Controller, Service e Repository, adiantados para as próximas
+sprints; não são exigidos nesta.
+
+Integrantes e responsabilidades: ver [Responsabilidades da equipe](#responsabilidades-da-equipe).
+Evidências: pasta [`evidencias/`](evidencias/).
+
+---
+
 ## O problema
 
 A CTI mantém a carteira de clientes em planilhas Excel preenchidas manualmente
@@ -76,6 +164,7 @@ InsightFlow/
 │   └── output/         clientes.json, indicadores.json, insights.json, graficos/
 ├── database/           [PostgreSQL]
 │   └── schema.sql
+├── evidencias/         prints da entrega da Sprint 2
 ├── docs/
 │   ├── diagrama/       diagrama-classes.png
 │   └── prototipos/     telas do sistema em .png
