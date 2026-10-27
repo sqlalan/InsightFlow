@@ -108,7 +108,7 @@ const highlights = [
           <rect x="4.5" y="10" width="15" height="10" rx="2" />
           <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" stroke-linecap="round" />
         </svg>
-        InsightFlow · análise da carteira de clientes
+        InsightFlow CTI · análise da carteira de clientes
       </div>
     </aside>
 
@@ -281,7 +281,7 @@ const highlights = [
           Ao continuar, você concorda com os
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Termos de uso</a> e a
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Política de privacidade</a>
-          do InsightFlow.
+          do InsightFlow CTI.
         </p>
       </div>
     </main>

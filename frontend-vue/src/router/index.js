@@ -7,45 +7,45 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { title: 'InsightFlow — Inteligência de dados a partir das suas planilhas' },
+    meta: { title: 'InsightFlow CTI — Inteligência de dados a partir das suas planilhas' },
   },
   {
     path: '/login',
     name: 'login',
     // carregada sob demanda: mantém o bundle da landing enxuto
     component: () => import('../views/LoginView.vue'),
-    meta: { title: 'Entrar — InsightFlow' },
+    meta: { title: 'Entrar — InsightFlow CTI' },
   },
   {
     path: '/cadastro',
     name: 'cadastro',
     component: () => import('../views/CadastroView.vue'),
-    meta: { title: 'Solicitar conta — InsightFlow' },
+    meta: { title: 'Solicitar conta — InsightFlow CTI' },
   },
   {
     path: '/upload',
     name: 'upload',
     // painel carregado sob demanda: a landing nao paga o custo do Chart.js
     component: () => import('../views/UploadView.vue'),
-    meta: { title: 'Enviar planilha — InsightFlow' },
+    meta: { title: 'Enviar planilha — InsightFlow CTI' },
   },
   {
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('../views/DashboardView.vue'),
-    meta: { title: 'Dashboard — InsightFlow' },
+    meta: { title: 'Dashboard — InsightFlow CTI' },
   },
   {
     path: '/relatorios',
     name: 'relatorios',
     component: () => import('../views/RelatoriosView.vue'),
-    meta: { title: 'Relatórios — InsightFlow' },
+    meta: { title: 'Relatórios — InsightFlow CTI' },
   },
   {
     path: '/usuarios',
     name: 'usuarios',
     component: () => import('../views/UsuariosView.vue'),
-    meta: { title: 'Usuários — InsightFlow', perfil: 'ADMIN' },
+    meta: { title: 'Usuários — InsightFlow CTI', perfil: 'ADMIN' },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -64,7 +64,7 @@ const router = createRouter({
 })
 
 router.afterEach((to) => {
-  document.title = to.meta?.title ?? 'InsightFlow'
+  document.title = to.meta?.title ?? 'InsightFlow CTI'
 })
 
 router.beforeEach((to) => {

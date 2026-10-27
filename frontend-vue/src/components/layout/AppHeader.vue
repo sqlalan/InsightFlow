@@ -24,7 +24,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     :class="scrolled ? 'border-b border-white/10 bg-ink-950/80 backdrop-blur-xl' : 'border-b border-transparent'"
   >
     <div class="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 lg:px-8">
-      <RouterLink to="/" class="shrink-0" aria-label="InsightFlow — início">
+      <RouterLink to="/" class="shrink-0" aria-label="InsightFlow CTI — início">
         <BrandLogo />
       </RouterLink>
 

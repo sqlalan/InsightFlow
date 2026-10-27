@@ -77,7 +77,7 @@ const contatos = [
         </ul>
 
         <div class="flex items-center gap-6">
-          <p class="text-xs text-mist-500">© {{ year }} InsightFlow</p>
+          <p class="text-xs text-mist-500">© {{ year }} InsightFlow CTI</p>
         </div>
       </div>
     </div>

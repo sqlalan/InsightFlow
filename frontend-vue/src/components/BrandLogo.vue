@@ -39,8 +39,16 @@ const textSize = {
         />
       </svg>
     </span>
-    <span v-if="wordmark" :class="textSize[size]" class="font-semibold tracking-tight text-white">
-      Insight<span class="text-flow-300">Flow</span>
+    <span v-if="wordmark" class="inline-flex items-center gap-2">
+      <span :class="textSize[size]" class="font-semibold tracking-tight text-white">
+        Insight<span class="text-flow-300">Flow</span>
+      </span>
+      <!-- selo da empresa parceira: o nome completo do sistema é "InsightFlow CTI" -->
+      <span
+        class="rounded-md border border-flow-400/40 bg-flow-500/10 px-1.5 py-0.5 text-xs font-semibold tracking-wide text-flow-200"
+      >
+        CTI
+      </span>
     </span>
   </span>
 </template>

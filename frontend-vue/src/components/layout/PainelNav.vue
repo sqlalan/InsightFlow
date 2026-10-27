@@ -48,7 +48,7 @@ watch(() => route.path, () => (aberto.value = false))
       </svg>
     </button>
 
-    <RouterLink to="/" aria-label="InsightFlow — início">
+    <RouterLink to="/" aria-label="InsightFlow CTI — início">
       <BrandLogo size="sm" />
     </RouterLink>
   </header>
@@ -78,7 +78,7 @@ watch(() => route.path, () => (aberto.value = false))
     aria-label="Navegação do painel"
   >
     <div class="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
-      <RouterLink to="/" aria-label="InsightFlow — início">
+      <RouterLink to="/" aria-label="InsightFlow CTI — início">
         <BrandLogo size="sm" />
       </RouterLink>
 

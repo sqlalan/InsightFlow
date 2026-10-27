@@ -51,7 +51,7 @@ const bars = [38, 52, 45, 63, 58, 74, 69, 88, 81, 96]
         </h1>
 
         <p class="mt-5 max-w-xl text-lg leading-relaxed text-mist-300">
-          O InsightFlow lê seus arquivos <span class="font-medium text-mist-100">.xlsx</span> e
+          O InsightFlow CTI lê seus arquivos <span class="font-medium text-mist-100">.xlsx</span> e
           <span class="font-medium text-mist-100">.xls</span>, valida a consistência dos dados e
           entrega indicadores, tendências e alertas prontos — sem macro e sem retrabalho.
         </p>
