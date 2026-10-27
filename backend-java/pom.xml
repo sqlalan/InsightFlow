@@ -15,7 +15,7 @@
   <artifactId>cti-insights</artifactId>
   <version>1.0.0</version>
   <name>cti-insights-backend</name>
-  <description>API do Sistema CTI Insights - Projeto Integrador II</description>
+  <description>API do InsightFlow CTI - Projeto Integrador II</description>
 
   <properties>
     <java.version>21</java.version>

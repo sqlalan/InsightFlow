@@ -1,6 +1,6 @@
 # backend-java — API Spring Boot
 
-API REST do Sistema CTI Insights: recebe a planilha, valida, aciona o módulo
+API REST do InsightFlow CTI: recebe a planilha, valida, aciona o módulo
 Python de tratamento, grava no PostgreSQL e serve os dados do dashboard.
 
 ## Rodando local

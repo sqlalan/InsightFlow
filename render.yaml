@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Blueprint do Render - Back-end do Sistema CTI Insights.
+# Blueprint do Render - Back-end do InsightFlow CTI.
 #
 # A imagem e construida pelo backend-java/Dockerfile, que instala JRE e Python
 # no mesmo container (o AnaliseService chama o script Python por ProcessBuilder).

@@ -1,4 +1,4 @@
-# InsightFlow — Sistema CTI Insights
+# InsightFlow CTI
 
 **Projeto Integrador II — SENAI "Roberto Mange"**
 Tecnologia em Análise e Desenvolvimento de Sistemas · Módulo F1 · 2º semestre
@@ -63,7 +63,7 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local   # Windows (cmd/Power
 
 | Rota | Tela | O que tem |
 | ---- | ---- | --------- |
-| `/` | Home pública | Apresentação do CTI Insights, funcionalidades (Upload, Dashboard, Relatórios) e botão que leva ao Login. Sem sidebar. |
+| `/` | Home pública | Apresentação do InsightFlow CTI, funcionalidades (Upload, Dashboard, Relatórios) e botão que leva ao Login. Sem sidebar. |
 | `/login` | Login | E-mail, senha e botão "Entrar". Validação só no navegador; autenticação real fica para as próximas sprints. |
 | `/dashboard` | Dashboard | Cards de indicadores, 4 gráficos (segmento, nível, faixa de faturamento, evolução), tabela de clientes e insights. |
 | `/upload` | Upload | Seleção da planilha (.xlsx/.xls), nome do arquivo, status da leitura e prévia dos dados. |
@@ -79,6 +79,7 @@ correspondência:
 
 | Sugerido nas orientações | Neste repositório |
 | ------------------------ | ----------------- |
+| Nome "Sistema CTI Insights" | **InsightFlow CTI** (nome escolhido pela equipe) |
 | `frontend/` | `frontend-vue/` |
 | `backend/` | `backend-java/` |
 | `python/` | `analytics-python/` |
