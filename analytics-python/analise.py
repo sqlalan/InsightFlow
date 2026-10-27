@@ -1,5 +1,5 @@
 """
-Ponto de entrada do modulo de Ciencia de Dados do Sistema CTI Insights.
+Ponto de entrada do modulo de Ciencia de Dados do InsightFlow CTI.
 
 Fluxo: le a planilha -> trata (limpeza.py) -> calcula estatisticas -> gera
 graficos (graficos.py) -> escreve insights (insights.py) -> grava os JSON que o

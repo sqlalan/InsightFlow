@@ -1,6 +1,6 @@
 # frontend-vue — Interface
 
-Front-end do Sistema CTI Insights.
+Front-end do InsightFlow CTI.
 **Vue 3** (`<script setup>`) + **Vite** + **Tailwind CSS 4** + **Vue Router 4** +
 **Pinia** + **Chart.js** (via `vue-chartjs`) + **axios** + **xlsx** (SheetJS).
 
