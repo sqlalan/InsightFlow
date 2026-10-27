@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import java.security.Principal;
 import java.util.Map;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,14 @@ public class AuthController {
                 .body(auth.login(request.email(), request.password(), request.remember()));
     }
 
+    /** Pedido de conta: responde 201, mas so permite entrar depois que o admin aprovar. */
+    @PostMapping("/cadastro")
+    public ResponseEntity<Map<String, String>> cadastrar(@Valid @RequestBody CadastroRequest request) {
+        auth.cadastrar(request.nome(), request.email(), request.password());
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "mensagem", "Pedido enviado. Você poderá entrar assim que o administrador aprovar sua conta."));
+    }
+
     @GetMapping("/me")
     public Map<String, String> me(Principal principal) { return Map.of("email", principal.getName()); }
 
@@ -38,6 +47,15 @@ public class AuthController {
             @NotBlank @Size(max = 72) String password, boolean remember) {
         @Override public String toString() {
             return "LoginRequest[email=" + email + ", password=[PROTEGIDO], remember=" + remember + "]";
+        }
+    }
+
+    public record CadastroRequest(@NotBlank(message = "informe seu nome") @Size(max = 120) String nome,
+            @NotBlank(message = "informe seu e-mail") @Email(message = "e-mail em formato inválido")
+            @Size(max = 255) String email,
+            @NotBlank @Size(min = 8, max = 72, message = "a senha deve ter de 8 a 72 caracteres") String password) {
+        @Override public String toString() {
+            return "CadastroRequest[nome=" + nome + ", email=" + email + ", password=[PROTEGIDO]]";
         }
     }
 }

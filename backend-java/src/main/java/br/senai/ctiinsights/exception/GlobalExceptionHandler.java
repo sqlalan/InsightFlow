@@ -32,6 +32,18 @@ public class GlobalExceptionHandler {
                 401, "CREDENCIAIS_INVALIDAS", "E-mail ou senha inválidos."));
     }
 
+    @ExceptionHandler(ContaNaoLiberadaException.class)
+    public ResponseEntity<ApiError> contaNaoLiberada(ContaNaoLiberadaException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of(
+                403, ex.getCodigo(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(EmailJaCadastradoException.class)
+    public ResponseEntity<ApiError> emailJaCadastrado(EmailJaCadastradoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                409, "EMAIL_JA_CADASTRADO", ex.getMessage()));
+    }
+
     @ExceptionHandler({HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class, MissingServletRequestPartException.class})
     public ResponseEntity<ApiError> requisicaoInvalida(Exception ex) {
