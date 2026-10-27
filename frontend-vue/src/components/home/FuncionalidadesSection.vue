@@ -25,7 +25,7 @@ const funcionalidades = [
       <div class="max-w-2xl">
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-flow-400">Funcionalidades</p>
         <h2 class="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-          Tudo o que o CTI Insights faz com a sua planilha
+          Tudo o que o InsightFlow CTI faz com a sua planilha
         </h2>
       </div>
 
