@@ -51,7 +51,7 @@ async function handleSubmit() {
 }
 
 const highlights = [
-  'Acesso com as credenciais fornecidas pelo administrador',
+  'Contas novas só entram depois da aprovação do administrador',
   'Sessões com prazo de validade e opção de encerrar o acesso',
   'Histórico de processamento das planilhas no painel de relatórios',
 ]
@@ -138,7 +138,7 @@ const highlights = [
           Acessar a plataforma
         </h1>
         <p class="mt-2.5 text-sm text-mist-400">
-          Use as credenciais fornecidas pelo administrador da sua organização.
+          Entre com o e-mail e a senha da sua conta.
         </p>
 
         <Transition
@@ -289,9 +289,9 @@ const highlights = [
 
         <p class="mt-8 text-center text-sm text-mist-400">
           Ainda não tem acesso?
-          <a href="#" class="font-medium text-flow-300 transition hover:text-flow-200">
+          <RouterLink to="/cadastro" class="font-medium text-flow-300 transition hover:text-flow-200">
             Solicite uma conta
-          </a>
+          </RouterLink>
         </p>
 
         <p class="mt-10 text-center text-xs leading-relaxed text-mist-500">

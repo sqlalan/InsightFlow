@@ -26,6 +26,11 @@ export async function entrar(email, password, remember) {
   return data
 }
 
+/** Pedido de conta: não faz login, a conta só entra depois que o admin aprovar. */
+export function cadastrar(nome, email, password) {
+  return api.post('/api/auth/cadastro', { nome, email, password }).then((resposta) => resposta.data)
+}
+
 export async function sair() {
   try {
     await api.post('/api/auth/logout')

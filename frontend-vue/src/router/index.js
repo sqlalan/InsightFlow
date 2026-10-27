@@ -17,6 +17,12 @@ const routes = [
     meta: { title: 'Entrar — InsightFlow' },
   },
   {
+    path: '/cadastro',
+    name: 'cadastro',
+    component: () => import('../views/CadastroView.vue'),
+    meta: { title: 'Solicitar conta — InsightFlow' },
+  },
+  {
     path: '/upload',
     name: 'upload',
     // painel carregado sob demanda: a landing nao paga o custo do Chart.js
