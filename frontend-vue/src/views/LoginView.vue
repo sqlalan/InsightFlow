@@ -108,7 +108,7 @@ const highlights = [
           <rect x="4.5" y="10" width="15" height="10" rx="2" />
           <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" stroke-linecap="round" />
         </svg>
-        InsightFlow · análise da carteira de clientes
+        InsightFlow CTI · análise da carteira de clientes
       </div>
     </aside>
 
@@ -270,23 +270,6 @@ const highlights = [
           </button>
         </form>
 
-        <div class="my-7 flex items-center gap-4">
-          <span class="h-px flex-1 bg-white/10" />
-          <span class="text-xs text-mist-500">ou</span>
-          <span class="h-px flex-1 bg-white/10" />
-        </div>
-
-        <button
-          type="button"
-          class="flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/12 bg-white/4 px-5 py-3.5 text-sm font-medium text-mist-100 transition hover:bg-white/8"
-        >
-          <svg viewBox="0 0 24 24" class="h-4 w-4 text-mist-300" fill="none" stroke="currentColor" stroke-width="1.7">
-            <rect x="4.5" y="10" width="15" height="10" rx="2" />
-            <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" stroke-linecap="round" />
-          </svg>
-          Entrar com SSO corporativo
-        </button>
-
         <p class="mt-8 text-center text-sm text-mist-400">
           Ainda não tem acesso?
           <RouterLink to="/cadastro" class="font-medium text-flow-300 transition hover:text-flow-200">
@@ -298,7 +281,7 @@ const highlights = [
           Ao continuar, você concorda com os
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Termos de uso</a> e a
           <a href="#" class="underline underline-offset-2 hover:text-mist-300">Política de privacidade</a>
-          do InsightFlow.
+          do InsightFlow CTI.
         </p>
       </div>
     </main>
