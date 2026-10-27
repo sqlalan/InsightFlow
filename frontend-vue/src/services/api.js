@@ -26,6 +26,11 @@ export async function entrar(email, password, remember) {
   return data
 }
 
+/** Pedido de conta: não faz login, a conta só entra depois que o admin aprovar. */
+export function cadastrar(nome, email, password) {
+  return api.post('/api/auth/cadastro', { nome, email, password }).then((resposta) => resposta.data)
+}
+
 export async function sair() {
   try {
     await api.post('/api/auth/logout')
@@ -145,6 +150,16 @@ export function reclassificarCliente(id, nivel) {
 
 export function removerCliente(id) {
   return api.delete(`/api/clientes/${id}`).then(() => true)
+}
+
+/** Só o admin: todas as contas, com perfil e status. */
+export function listarUsuarios() {
+  return api.get('/api/usuarios').then((resposta) => resposta.data)
+}
+
+/** Só o admin: 'ATIVO' aprova ou desbloqueia, 'BLOQUEADO' recusa ou tira o acesso. */
+export function alterarStatusUsuario(id, status) {
+  return api.patch(`/api/usuarios/${id}/status`, { status }).then((resposta) => resposta.data)
 }
 
 export default api

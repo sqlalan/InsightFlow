@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest(properties = {"auth.admin-email=admin@example.com", "auth.admin-password=SenhaTeste123!"})
 @ActiveProfiles("local")
@@ -45,6 +46,78 @@ class ApiIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.email").value("admin@example.com"));
         mvc.perform(post("/api/auth/logout").header("Authorization", token)).andExpect(status().isNoContent());
         mvc.perform(get("/api/clientes").header("Authorization", token)).andExpect(status().isUnauthorized());
+    }
+
+    private ResultActions loginComo(String email, String senha) throws Exception {
+        return mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"" + email + "\",\"password\":\"" + senha + "\",\"remember\":false}"));
+    }
+
+    @Test
+    void cadastroSoEntraDepoisDaAprovacaoDoAdmin() throws Exception {
+        String admin = login();
+        String cadastro = """
+            {"nome":"Ana Souza","email":"Ana.Souza@Teste.com","password":"SenhaAna123"}
+            """;
+        mvc.perform(post("/api/auth/cadastro").contentType(MediaType.APPLICATION_JSON).content(cadastro))
+                .andExpect(status().isCreated());
+        // mesmo e-mail com outra caixa e a mesma conta
+        mvc.perform(post("/api/auth/cadastro").contentType(MediaType.APPLICATION_JSON).content(cadastro))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.erro").value("EMAIL_JA_CADASTRADO"));
+
+        // senha errada nao revela que a conta existe; senha certa explica que falta aprovar
+        loginComo("ana.souza@teste.com", "errada1234").andExpect(status().isUnauthorized());
+        loginComo("ana.souza@teste.com", "SenhaAna123").andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("CONTA_PENDENTE"));
+
+        String lista = mvc.perform(get("/api/usuarios").header("Authorization", admin))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        long id = 0;
+        for (var usuario : mapper.readTree(lista)) {
+            if (usuario.path("email").asText().equals("ana.souza@teste.com")) {
+                assertEquals("PENDENTE", usuario.path("status").asText());
+                assertTrue(usuario.path("senhaHash").isMissingNode());
+                id = usuario.path("id").asLong();
+            }
+        }
+        assertTrue(id > 0);
+
+        mvc.perform(patch("/api/usuarios/" + id + "/status").header("Authorization", admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"ATIVO\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("ATIVO"));
+        String json = loginComo("ana.souza@teste.com", "SenhaAna123").andExpect(status().isOk())
+                .andExpect(jsonPath("$.perfil").value("CONSULTOR"))
+                .andReturn().getResponse().getContentAsString();
+        String consultor = "Bearer " + mapper.readTree(json).path("token").asText();
+
+        // o consultor ve o sistema, mas nao a aprovacao de contas
+        mvc.perform(get("/api/clientes").header("Authorization", consultor)).andExpect(status().isOk());
+        mvc.perform(get("/api/usuarios").header("Authorization", consultor)).andExpect(status().isForbidden());
+
+        // bloquear derruba a sessao aberta e impede novo login
+        mvc.perform(patch("/api/usuarios/" + id + "/status").header("Authorization", admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"BLOQUEADO\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/clientes").header("Authorization", consultor)).andExpect(status().isUnauthorized());
+        loginComo("ana.souza@teste.com", "SenhaAna123").andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.erro").value("CONTA_BLOQUEADA"));
+
+        mvc.perform(patch("/api/usuarios/" + id + "/status").header("Authorization", admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"ATIVO\"}"))
+                .andExpect(status().isOk());
+        loginComo("ana.souza@teste.com", "SenhaAna123").andExpect(status().isOk());
+
+        // status fora da lista e conta do admin sao recusados
+        mvc.perform(patch("/api/usuarios/" + id + "/status").header("Authorization", admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"PENDENTE\"}"))
+                .andExpect(status().isBadRequest());
+        long adminId = 0;
+        for (var usuario : mapper.readTree(lista)) {
+            if (usuario.path("perfil").asText().equals("ADMIN")) adminId = usuario.path("id").asLong();
+        }
+        mvc.perform(patch("/api/usuarios/" + adminId + "/status").header("Authorization", admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"BLOQUEADO\"}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

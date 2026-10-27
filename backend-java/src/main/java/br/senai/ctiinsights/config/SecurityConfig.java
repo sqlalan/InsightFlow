@@ -35,9 +35,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(routes -> routes
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/cadastro").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Aprovacao de contas: o consultor ve todo o resto, menos isto.
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint((request, response, ex) -> writeError(response, mapper, 401,
@@ -50,9 +52,10 @@ public class SecurityConfig {
                             FilterChain chain) throws ServletException, IOException {
                         AuthService.Session session = auth.find(token(request));
                         if (session != null) {
+                            // O perfil da conta vira o papel: ROLE_ADMIN ou ROLE_CONSULTOR.
                             SecurityContextHolder.getContext().setAuthentication(
                                     new UsernamePasswordAuthenticationToken(session.email(), null,
-                                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+                                            List.of(new SimpleGrantedAuthority("ROLE_" + session.perfil()))));
                         }
                         chain.doFilter(request, response);
                     }
