@@ -308,10 +308,10 @@ fictícios — é o único `.xlsx` liberado no `.gitignore`.
 
 ## Pendências conhecidas
 
-- A autenticação usa uma conta administrativa definida por ambiente. As sessões
-  ficam em memória e são invalidadas ao reiniciar a API. Cadastro de múltiplos
-  usuários, recuperação de senha, SSO e autenticação em dois fatores ainda não
-  estão implementados.
+- Consultores pedem conta em `/cadastro` e o administrador (definido por
+  ambiente) aprova ou bloqueia em `/usuarios`. As sessões ficam em memória e são
+  invalidadas ao reiniciar a API. Recuperação de senha, SSO e autenticação em
+  dois fatores ainda não estão implementados.
 - Links de "Esqueci minha senha", SSO, termos e privacidade apontam para `#`.
 
 O roteiro completo para Windows, com exemplos de chamadas e explicação das

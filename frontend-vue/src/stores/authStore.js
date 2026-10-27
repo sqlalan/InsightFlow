@@ -16,11 +16,16 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     logado: getSession() !== null,
     usuario: getSession()?.email ?? '',
+    nome: getSession()?.nome ?? '',
+    // 'ADMIN' ou 'CONSULTOR', vindo do Spring Boot no login.
+    perfil: getSession()?.perfil ?? '',
   }),
 
   // GETTERS = valores calculados a partir do state.
   getters: {
-    nomeExibicao: (state) => state.usuario || 'Usuário',
+    nomeExibicao: (state) => state.nome || state.usuario || 'Usuário',
+    /** Mostra o menu de aprovação. Quem barra de verdade é o hasRole("ADMIN") da API. */
+    ehAdmin: (state) => state.perfil === 'ADMIN',
   },
 
   // ACTIONS = ações que alteram o state.
@@ -30,6 +35,8 @@ export const useAuthStore = defineStore('auth', {
       const sessao = await entrar(email, senha, lembrar)
       this.logado = true
       this.usuario = sessao.email
+      this.nome = sessao.nome
+      this.perfil = sessao.perfil
       return true
     },
 
@@ -41,6 +48,8 @@ export const useAuthStore = defineStore('auth', {
       }
       this.logado = false
       this.usuario = ''
+      this.nome = ''
+      this.perfil = ''
     },
   },
 })

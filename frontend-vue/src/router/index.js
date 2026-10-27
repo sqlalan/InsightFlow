@@ -42,6 +42,12 @@ const routes = [
     meta: { title: 'Relatórios — InsightFlow' },
   },
   {
+    path: '/usuarios',
+    name: 'usuarios',
+    component: () => import('../views/UsuariosView.vue'),
+    meta: { title: 'Usuários — InsightFlow', perfil: 'ADMIN' },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -62,8 +68,14 @@ router.afterEach((to) => {
 })
 
 router.beforeEach((to) => {
-  if (['upload', 'dashboard', 'relatorios'].includes(to.name) && !getSession()) {
+  const session = getSession()
+  if (['upload', 'dashboard', 'relatorios', 'usuarios'].includes(to.name) && !session) {
     return { name: 'login' }
+  }
+  // Rota com perfil exigido (meta.perfil): o consultor volta para o dashboard.
+  // Isso só esconde a tela; a API recusa com 403 de qualquer forma.
+  if (to.meta.perfil && session?.perfil !== to.meta.perfil) {
+    return { name: 'dashboard' }
   }
 })
 

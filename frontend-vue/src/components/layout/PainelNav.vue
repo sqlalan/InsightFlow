@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/authStore'
 import BrandLogo from '../BrandLogo.vue'
@@ -18,11 +18,13 @@ async function sair() {
   saindo.value = false
 }
 
-const links = [
+const links = computed(() => [
   { to: '/upload', label: 'Enviar planilha', icone: 'upload' },
   { to: '/dashboard', label: 'Dashboard', icone: 'grafico' },
   { to: '/relatorios', label: 'Relatórios', icone: 'relatorio' },
-]
+  // Aprovação de contas: só aparece para o admin.
+  ...(auth.ehAdmin ? [{ to: '/usuarios', label: 'Usuários', icone: 'usuarios' }] : []),
+])
 
 // no celular a lateral vira gaveta: navegar precisa fechar o que cobre a tela
 watch(() => route.path, () => (aberto.value = false))
@@ -122,6 +124,11 @@ watch(() => route.path, () => (aberto.value = false))
             <rect x="5" y="12" width="3.5" height="6" rx="1" />
             <rect x="10.25" y="8" width="3.5" height="10" rx="1" />
             <rect x="15.5" y="4" width="3.5" height="14" rx="1" />
+          </template>
+          <template v-else-if="link.icone === 'usuarios'">
+            <circle cx="9" cy="8" r="3.5" />
+            <path d="M3 20a6 6 0 0 1 12 0" stroke-linecap="round" />
+            <path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6 6 0 0 1 3 5.5" stroke-linecap="round" />
           </template>
           <template v-else>
             <path d="M14 3v4.5h4.5" stroke-linecap="round" stroke-linejoin="round" />
