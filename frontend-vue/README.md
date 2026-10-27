@@ -115,7 +115,4 @@ horizontalmente dentro do próprio card em telas estreitas.
 
 ## Pendências
 
-- `LoginView.vue`: `handleSubmit` valida no cliente e abre o painel direto. O
-  ponto de integração está marcado com `TODO` (`POST /api/auth/login`).
-- Links de "Esqueci minha senha", "Solicite uma conta", SSO, termos e
-  privacidade apontam para `#`.
+- Links de "Esqueci minha senha", termos e privacidade apontam para `#`.
